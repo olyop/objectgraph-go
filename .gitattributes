@@ -1,0 +1,11 @@
+*.sql linguist-detectable=true
+*.sql linguist-language=sql
+
+*.graphql linguist-detectable=true
+*.graphql linguist-language=graphql
+
+*.graphqls linguist-detectable=true
+*.graphqls linguist-language=graphql
+
+*.tsx linguist-detectable=true
+*.tsx linguist-language=tsx
