@@ -1,0 +1,14 @@
+{
+	"overrides": [
+		{
+			"files": ["*.ts", "*.tsx"],
+			"extends": "@oly_op/eslint-config"
+		},
+		{
+			"files": ["*.graphql", "*.gql", "*.graphqls"],
+			"parser": "@graphql-eslint/eslint-plugin",
+			"plugins": ["@graphql-eslint"],
+			"extends": "@oly_op/eslint-config-graphql"
+		}
+	]
+}

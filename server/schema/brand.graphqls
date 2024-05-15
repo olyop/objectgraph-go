@@ -1,0 +1,5 @@
+type Brand {
+	brandID: UUID!
+	name: String!
+	createdAt: Timestamp!
+}

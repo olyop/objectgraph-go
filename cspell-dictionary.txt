@@ -1,0 +1,15 @@
+awslabs
+bottleo
+Clicquot
+dbname
+gqlparser
+gqls
+graphqlcompiler
+graphqlparser
+ollies
+postgres
+redis
+Sauvignon
+sslmode
+uuid
+vektah

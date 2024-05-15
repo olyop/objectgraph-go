@@ -1,0 +1,5 @@
+type Category {
+	categoryID: UUID!
+	name: String!
+	createdAt: Timestamp!
+}

@@ -1,0 +1,10 @@
+schema {
+	query: Query
+}
+
+scalar UUID
+scalar Timestamp
+scalar Price
+
+directive @retrieve(key: String!) on FIELD_DEFINITION
+directive @data(field: String!) on FIELD_DEFINITION

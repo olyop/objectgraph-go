@@ -1,0 +1,11 @@
+type Product {
+	productID: UUID!
+	name: String!
+	createdAt: Timestamp!
+
+	price: Price!
+	volume: Int
+	abv: Float
+	brand: Brand!
+	categories: [Category!]!
+}
