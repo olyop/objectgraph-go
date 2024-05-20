@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database/queries"
 )
 
 type Brand struct {
@@ -12,36 +13,24 @@ type Brand struct {
 	CreatedAt time.Time
 }
 
-var selectBrandByIDQuery = `
-	SELECT
-		brands.brand_id,
-		brands.name,
-		brands.created_at
-	FROM
-		brands
-	WHERE
-		brands.brand_id = $1;
-`
+func SelectBrandByID(brandID uuid.UUID) (*Brand, error) {
+	row := db.QueryRow(queries.SelectBrandByIDQuery, brandID)
 
-func SelectBrandByID(brandID uuid.UUID) (brand Brand, err error) {
-	rows, err := db.Query(selectBrandByIDQuery, brandID)
+	var brand Brand
+	var createdAt int64
+
+	cols := []interface{}{
+		&brand.BrandID,
+		&brand.Name,
+		&createdAt,
+	}
+
+	err := row.Scan(cols...)
 	if err != nil {
-		return brand, err
+		return nil, err
 	}
 
-	defer rows.Close()
+	brand.CreatedAt = time.UnixMilli(createdAt)
 
-	if rows.Next() {
-		err = rows.Scan(
-			&brand.BrandID,
-			&brand.Name,
-			&brand.CreatedAt,
-		)
-
-		if err != nil {
-			return brand, err
-		}
-	}
-
-	return brand, nil
+	return &brand, nil
 }

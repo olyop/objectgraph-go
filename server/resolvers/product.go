@@ -1,10 +1,12 @@
 package resolvers
 
 import (
-	"errors"
+	"time"
 
-	"github.com/olyop/graphql-go/database"
-	"github.com/olyop/graphql-go/resolvers/scalars"
+	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database"
+	"github.com/olyop/graphql-go/server/resolvers/engine"
+	"github.com/olyop/graphql-go/server/resolvers/scalars"
 )
 
 type ProductResolver struct {
@@ -23,30 +25,72 @@ func (r *ProductResolver) CreatedAt() scalars.Timestamp {
 	return scalars.Timestamp{Time: r.Product.CreatedAt}
 }
 
-func (r *ProductResolver) Price() (scalar scalars.Price, err error) {
-	return scalars.Price{Value: r.Product.Price}, nil
+func (r *ProductResolver) Price() scalars.Price {
+	return scalars.Price{Value: r.Product.Price}
 }
 
 func (r *ProductResolver) Volume() *int32 {
-	value := int32(r.Product.Volume)
+	if !r.Product.Volume.Valid {
+		return nil
+	}
+
+	value := int32(r.Product.Volume.Int64)
 
 	return &value
 }
 
-func (r *ProductResolver) ABV() *int32 {
-	value := int32(r.Product.ABV)
+func (r *ProductResolver) ABV() *float64 {
+	if !r.Product.ABV.Valid {
+		return nil
+	}
+
+	value := float64(r.Product.ABV.Float64)
 
 	return &value
 }
 
 func (r *ProductResolver) Brand() (*BrandResolver, error) {
-	brand, err := database.SelectBrandByID(r.Product.BrandID)
-	if err != nil {
-		return nil, errors.New("failed to get brand")
-	}
-
-	return &BrandResolver{&brand}, nil
+	return engine.Resolver(engine.ResolverOptions[*BrandResolver]{
+		GroupKey: "brands",
+		Duration: 15 * time.Second,
+		CacheKey: r.Product.BrandID.String(),
+		Retrieve: brandRetriever(r.Product.BrandID),
+	})
 }
 
 func (r *ProductResolver) Categories() ([]*CategoryResolver, error) {
+	return engine.Resolver(engine.ResolverOptions[[]*CategoryResolver]{
+		GroupKey: "categories",
+		Duration: 15 * time.Second,
+		CacheKey: r.Product.ProductID.String(),
+		Retrieve: categoriesRetriever(r.Product.ProductID),
+	})
+}
+
+func brandRetriever(brandID uuid.UUID) func() (*BrandResolver, error) {
+	return func() (*BrandResolver, error) {
+		brand, err := database.SelectBrandByID(brandID)
+		if err != nil {
+			return nil, err
+		}
+
+		return &BrandResolver{brand}, nil
+	}
+}
+
+func categoriesRetriever(productID uuid.UUID) func() ([]*CategoryResolver, error) {
+	return func() ([]*CategoryResolver, error) {
+		categories, err := database.SelectCategoriesByProductID(productID)
+		if err != nil {
+			return nil, err
+		}
+
+		resolvers := make([]*CategoryResolver, 0, len(categories))
+
+		for i := range categories {
+			resolvers = append(resolvers, &CategoryResolver{categories[i]})
+		}
+
+		return resolvers, nil
+	}
 }

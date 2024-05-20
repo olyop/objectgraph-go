@@ -1,16 +1,28 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 var db *sql.DB
 
-func Connect() (err error) {
-	db, err = sql.Open("postgres", "postgres://postgres:postgres@localhost:5432/ollies-bottleo?sslmode=disable")
+func Connect() error {
+	var err error
+
+	connectionString := "user=postgres password=postgres dbname=ollies-bottleo sslmode=disable"
+
+	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error opening database connection: %v", err)
 	}
 
-	return db.Ping()
+	err = db.Ping()
+	if err != nil {
+		return fmt.Errorf("error pinging database: %v", err)
+	}
+
+	return nil
 }
 
 func Close() {

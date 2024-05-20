@@ -1,8 +1,8 @@
 package resolvers
 
 import (
-	"github.com/olyop/graphql-go/database"
-	"github.com/olyop/graphql-go/resolvers/scalars"
+	"github.com/olyop/graphql-go/server/database"
+	"github.com/olyop/graphql-go/server/resolvers/scalars"
 )
 
 type BrandResolver struct {

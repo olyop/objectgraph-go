@@ -6,9 +6,9 @@ import (
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"github.com/olyop/graphql-go/database"
-	"github.com/olyop/graphql-go/resolvers"
-	"github.com/olyop/graphql-go/schema"
+	"github.com/olyop/graphql-go/server/database"
+	"github.com/olyop/graphql-go/server/resolvers"
+	"github.com/olyop/graphql-go/server/schema"
 
 	_ "github.com/lib/pq"
 )

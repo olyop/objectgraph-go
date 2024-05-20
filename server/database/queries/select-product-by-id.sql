@@ -11,7 +11,7 @@ FROM
 	JOIN products_prices ON products.product_id = products_prices.product_id
 	LEFT JOIN products_abv ON products.product_id = products_abv.product_id
 	LEFT JOIN products_volumes ON products.product_id = products_volumes.product_id
-ORDER BY
-	products.name
+WHERE
+	products.product_id = $1
 LIMIT
 	100;

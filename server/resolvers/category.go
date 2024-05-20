@@ -1,22 +1,22 @@
 package resolvers
 
 import (
-	"github.com/olyop/graphql-go/database"
-	"github.com/olyop/graphql-go/resolvers/scalars"
+	"github.com/olyop/graphql-go/server/database"
+	"github.com/olyop/graphql-go/server/resolvers/scalars"
 )
 
 type CategoryResolver struct {
-	category *database.Category
+	*database.Category
 }
 
 func (r *CategoryResolver) CategoryID() scalars.UUID {
-	return scalars.UUID{UUID: r.category.CategoryID}
+	return scalars.UUID{UUID: r.Category.CategoryID}
 }
 
 func (r *CategoryResolver) Name() string {
-	return r.category.Name
+	return r.Category.Name
 }
 
 func (r *CategoryResolver) CreatedAt() scalars.Timestamp {
-	return scalars.Timestamp{Time: r.category.CreatedAt}
+	return scalars.Timestamp{Time: r.Category.CreatedAt}
 }

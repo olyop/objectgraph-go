@@ -1,0 +1,4 @@
+input UpdateProductInput {
+	productID: UUID!
+	name: String!
+}
