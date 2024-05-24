@@ -27,15 +27,18 @@ func TestGetProductsQuery(client *graphql.Client) {
 				price
 				volume
 				abv
+				updatedAt
 				createdAt
 				brand {
 					brandID
 					name
+					updatedAt
 					createdAt
 				}
 				categories {
 					categoryID
 					name
+					updatedAt
 					createdAt
 				}
 			}

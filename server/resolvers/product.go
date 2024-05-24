@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	// "github.com/graph-gophers/dataloader"
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/resolvers/engine"
+	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/resolvers/scalars"
 )
 
@@ -19,6 +20,14 @@ func (r *ProductResolver) ProductID() scalars.UUID {
 
 func (r *ProductResolver) Name() string {
 	return r.Product.Name
+}
+
+func (r *ProductResolver) UpdatedAt() *scalars.Timestamp {
+	if r.Product.UpdatedAt.IsZero() {
+		return nil
+	}
+
+	return &scalars.Timestamp{Time: r.Product.UpdatedAt}
 }
 
 func (r *ProductResolver) CreatedAt() scalars.Timestamp {
@@ -50,7 +59,7 @@ func (r *ProductResolver) ABV() *float64 {
 }
 
 func (r *ProductResolver) Brand() (*BrandResolver, error) {
-	return engine.Resolver(engine.ResolverOptions[*BrandResolver]{
+	return engine.Resolver(engine.ResolverOptions[BrandResolver]{
 		GroupKey: "brands",
 		Duration: 15 * time.Second,
 		CacheKey: r.Product.BrandID.String(),
@@ -59,7 +68,7 @@ func (r *ProductResolver) Brand() (*BrandResolver, error) {
 }
 
 func (r *ProductResolver) Categories() ([]*CategoryResolver, error) {
-	return engine.Resolver(engine.ResolverOptions[[]*CategoryResolver]{
+	return engine.Resolvers(engine.ResolversOptions[CategoryResolver]{
 		GroupKey: "categories",
 		Duration: 15 * time.Second,
 		CacheKey: r.Product.ProductID.String(),

@@ -1,5 +1,6 @@
 type Brand {
 	brandID: UUID!
 	name: String!
+	updatedAt: Timestamp
 	createdAt: Timestamp!
 }

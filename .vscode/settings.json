@@ -1,0 +1,14 @@
+{
+	"sqltools.connections": [
+		{
+			"previewLimit": 50,
+			"server": "localhost",
+			"port": 5432,
+			"driver": "PostgreSQL",
+			"name": "ollies-bottleo",
+			"database": "ollies-bottleo",
+			"username": "postgres",
+			"password": "postgres"
+		}
+	]
+}

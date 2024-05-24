@@ -1,5 +1,6 @@
 type Category {
 	categoryID: UUID!
 	name: String!
+	updatedAt: Timestamp
 	createdAt: Timestamp!
 }

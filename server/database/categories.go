@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,6 +11,7 @@ import (
 type Category struct {
 	CategoryID uuid.UUID
 	Name       string
+	UpdatedAt  time.Time
 	CreatedAt  time.Time
 }
 
@@ -25,17 +27,23 @@ func SelectCategoriesByProductID(productID uuid.UUID) ([]*Category, error) {
 
 	for rows.Next() {
 		var category Category
+		var updatedAt sql.NullInt64
 		var createdAt int64
 
 		cols := []interface{}{
 			&category.CategoryID,
 			&category.Name,
+			&updatedAt,
 			&createdAt,
 		}
 
 		err := rows.Scan(cols...)
 		if err != nil {
 			return nil, err
+		}
+
+		if updatedAt.Valid {
+			category.UpdatedAt = time.UnixMilli(updatedAt.Int64)
 		}
 
 		category.CreatedAt = time.UnixMilli(createdAt)

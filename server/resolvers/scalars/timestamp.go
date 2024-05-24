@@ -32,5 +32,5 @@ func (t *Timestamp) UnmarshalGraphQL(input interface{}) error {
 }
 
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", t.Unix())), nil
+	return []byte(fmt.Sprintf("\"%d\"", t.UnixMilli())), nil
 }

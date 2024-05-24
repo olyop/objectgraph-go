@@ -14,11 +14,9 @@ import (
 )
 
 func main() {
-	err := database.Connect()
-	if err != nil {
-		log.Fatal(err)
-	}
+	loadEnv()
 
+	database.Connect()
 	defer database.Close()
 
 	schemaString, err := schema.ReadSourceFiles("./schema")

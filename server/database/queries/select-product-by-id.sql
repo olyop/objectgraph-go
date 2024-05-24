@@ -1,17 +1,19 @@
 SELECT
 	products.product_id,
-	products.name,
+	products.product_name,
 	products.brand_id,
-	products_prices.value,
-	products_abv.abv,
+	prices.price_value,
+	products_abvs.abv,
 	products_volumes.volume,
+	products.updated_at,
 	products.created_at
 FROM
 	products
-	JOIN products_prices ON products.product_id = products_prices.product_id
-	LEFT JOIN products_abv ON products.product_id = products_abv.product_id
+	LEFT JOIN products_prices ON products.product_id = products_prices.product_id
+	LEFT JOIN products_abvs ON products.product_id = products_abvs.product_id
 	LEFT JOIN products_volumes ON products.product_id = products_volumes.product_id
+	LEFT JOIN prices ON products_prices.price_id = prices.price_id
 WHERE
 	products.product_id = $1
 LIMIT
-	100;
+	1000;

@@ -1,6 +1,7 @@
 type Product {
 	productID: UUID!
 	name: String!
+	updatedAt: Timestamp
 	createdAt: Timestamp!
 
 	price: Price!

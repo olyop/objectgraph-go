@@ -10,15 +10,17 @@ var cache Cache = Cache{
 	groups: make(CacheGroups),
 }
 
-func Get[T interface{}](groupKey string, cacheKey string) (T, bool) {
+func Get[T any](groupKey string, cacheKey string) (*T, bool) {
 	group := handleGroup(groupKey)
 
-	var value T
+	var value *T
 
 	item, exists := group.values[cacheKey]
 	if !exists {
-		return value, false
+		return nil, false
 	}
+
+	value = item.value.(*T)
 
 	// expired cache item
 	if item.expires.Before(time.Now()) {
@@ -26,29 +28,63 @@ func Get[T interface{}](groupKey string, cacheKey string) (T, bool) {
 
 		// check again in case another goroutine updated the item
 		item, exists = group.values[cacheKey]
-
-		value = item.value.(T)
-
-		// if the cache item was deleted by another goroutine
 		if !exists {
+			// the cache item was deleted by another goroutine
 			group.mu.Unlock()
 
-			return value, false
+			return nil, false
 		}
+
+		value = item.value.(*T)
 
 		delete(group.values, cacheKey)
 
 		group.mu.Unlock()
 
 		return value, false
-	} else {
-		value = item.value.(T)
 	}
 
 	return value, true
 }
 
-func Set(groupKey string, cacheKey string, value interface{}, ttl time.Duration) {
+func GetList[T any](groupKey string, cacheKey string) ([]*T, bool) {
+	group := handleGroup(groupKey)
+
+	var value []*T
+
+	item, exists := group.values[cacheKey]
+	if !exists {
+		return value, false
+	}
+
+	value = item.value.([]*T)
+
+	// expired cache item
+	if item.expires.Before(time.Now()) {
+		group.mu.Lock()
+
+		// check again in case another goroutine updated the item
+		item, exists = group.values[cacheKey]
+		if !exists {
+			// the cache item was deleted by another goroutine
+			group.mu.Unlock()
+
+			return value, false
+		}
+
+		value = item.value.([]*T)
+
+		delete(group.values, cacheKey)
+
+		group.mu.Unlock()
+
+		return value, false
+	}
+
+	return value, true
+}
+
+func Set(groupKey string, cacheKey string, value any, ttl time.Duration) {
 	group := handleGroup(groupKey)
 
 	group.mu.Lock()
@@ -123,6 +159,6 @@ type CacheGroup struct {
 type CacheValues map[string]*CacheItem
 
 type CacheItem struct {
-	value   interface{}
+	value   any
 	expires time.Time
 }

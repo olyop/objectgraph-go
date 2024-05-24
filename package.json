@@ -22,11 +22,15 @@
 		"node": "21.6.2",
 		"npm": "10.4.0"
 	},
+	"scripts": {
+		"rds-start": "aws rds start-db-instance --db-instance-identifier testing",
+		"rds-stop": "aws rds stop-db-instance --db-instance-identifier testing"
+	},
 	"devDependencies": {
 		"@oly_op/cspell-dict": "1.1.10",
 		"@oly_op/eslint-config": "6.7.20",
 		"@oly_op/eslint-config-graphql": "1.1.0",
-		"@oly_op/prettier-config": "1.8.6",
+		"@oly_op/prettier-config": "1.9.4",
 		"@oly_op/tsconfig": "1.2.1",
 		"npm-check-updates": "16.14.20"
 	}

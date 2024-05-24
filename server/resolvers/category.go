@@ -17,6 +17,14 @@ func (r *CategoryResolver) Name() string {
 	return r.Category.Name
 }
 
+func (r *CategoryResolver) UpdatedAt() *scalars.Timestamp {
+	if r.Category.UpdatedAt.IsZero() {
+		return nil
+	}
+
+	return &scalars.Timestamp{Time: r.Category.UpdatedAt}
+}
+
 func (r *CategoryResolver) CreatedAt() scalars.Timestamp {
 	return scalars.Timestamp{Time: r.Category.CreatedAt}
 }

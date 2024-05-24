@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/resolvers/engine"
+	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/resolvers/scalars"
 )
 
@@ -16,7 +16,7 @@ func (*Resolver) UpdateProductByID(args *UpdateProductByIDArgs) (*ProductResolve
 
 	fmt.Printf("Updating product with ID %s to name %s\n", productID, name)
 
-	return engine.Resolver(engine.ResolverOptions[*ProductResolver]{
+	return engine.Resolver(engine.ResolverOptions[ProductResolver]{
 		GroupKey: "product",
 		CacheKey: productID.String(),
 		Duration: time.Second * 15,

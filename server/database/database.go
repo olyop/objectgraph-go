@@ -3,26 +3,30 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 )
 
 var db *sql.DB
 
-func Connect() error {
+func Connect() {
 	var err error
 
-	connectionString := "user=postgres password=postgres dbname=ollies-bottleo sslmode=disable"
+	hostname := os.Getenv("POSTGRES_HOSTNAME")
+	database := os.Getenv("POSTGRES_DATABASE")
+	username := os.Getenv("POSTGRES_USERNAME")
+	password := os.Getenv("POSTGRES_PASSWORD")
+
+	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s", hostname, username, password, database)
 
 	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		return fmt.Errorf("error opening database connection: %v", err)
+		panic(err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return fmt.Errorf("error pinging database: %v", err)
+		panic(err)
 	}
-
-	return nil
 }
 
 func Close() {

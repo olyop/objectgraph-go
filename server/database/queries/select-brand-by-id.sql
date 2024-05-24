@@ -1,6 +1,7 @@
 SELECT
 	brands.brand_id,
-	brands.name,
+	brands.brand_name,
+	brands.updated_at,
 	brands.created_at
 FROM
 	brands
