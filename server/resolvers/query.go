@@ -1,14 +1,15 @@
 package resolvers
 
 import (
+	"context"
 	"time"
 
 	"github.com/olyop/graphql-go/server/database"
 	"github.com/olyop/graphql-go/server/engine"
 )
 
-func (*Resolver) GetProducts() ([]*ProductResolver, error) {
-	return engine.Resolvers(engine.ResolversOptions[ProductResolver]{
+func (*Resolver) GetProducts(ctx context.Context) ([]*ProductResolver, error) {
+	return engine.Resolver(engine.ResolverOptions[[]*ProductResolver]{
 		GroupKey: "query",
 		Duration: time.Second * 15,
 		CacheKey: "products",

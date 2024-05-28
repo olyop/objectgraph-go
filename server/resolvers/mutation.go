@@ -1,7 +1,6 @@
 package resolvers
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,11 +11,8 @@ import (
 
 func (*Resolver) UpdateProductByID(args *UpdateProductByIDArgs) (*ProductResolver, error) {
 	productID := args.Input.ProductID.UUID
-	name := args.Input.Name
 
-	fmt.Printf("Updating product with ID %s to name %s\n", productID, name)
-
-	return engine.Resolver(engine.ResolverOptions[ProductResolver]{
+	return engine.Resolver(engine.ResolverOptions[*ProductResolver]{
 		GroupKey: "product",
 		CacheKey: productID.String(),
 		Duration: time.Second * 15,

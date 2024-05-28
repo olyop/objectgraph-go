@@ -1,9 +1,24 @@
 package scalars
 
-import "strconv"
+import (
+	"database/sql"
+	"strconv"
+)
 
 type Price struct {
 	Value int64
+}
+
+func NewPrice(value int64) Price {
+	return Price{Value: value}
+}
+
+func NewNillPrice(value sql.NullInt64) *Price {
+	if !value.Valid {
+		return nil
+	}
+
+	return &Price{Value: value.Int64}
 }
 
 func (Price) ImplementsGraphQLType(name string) bool {

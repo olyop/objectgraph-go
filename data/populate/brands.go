@@ -3,6 +3,7 @@ package populate
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
@@ -48,14 +49,14 @@ func populateBrands(data *importdata.Data) (map[string][]string, map[string]stri
 
 	defer rows.Close()
 
-	brands := constructBrands(rows)
+	brands := brandsRowsMapper(rows)
 
-	logBrands(brands)
+	log.Printf("Populated %d brands", len(brands))
 
 	return classificationsToBrands, brands
 }
 
-func constructBrands(rows *sql.Rows) map[string]string {
+func brandsRowsMapper(rows *sql.Rows) map[string]string {
 	brands := make(map[string]string)
 
 	for rows.Next() {
@@ -71,12 +72,6 @@ func constructBrands(rows *sql.Rows) map[string]string {
 	}
 
 	return brands
-}
-
-func logBrands(brands map[string]string) {
-	for brandName, brandID := range brands {
-		fmt.Printf("Added Brand: %v, %v\n", brandID, brandName)
-	}
 }
 
 func clearBrands() {

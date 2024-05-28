@@ -10,6 +10,10 @@ type UUID struct {
 	uuid.UUID
 }
 
+func NewUUID(uuid uuid.UUID) UUID {
+	return UUID{UUID: uuid}
+}
+
 func (UUID) ImplementsGraphQLType(name string) bool {
 	return name == "UUID"
 }

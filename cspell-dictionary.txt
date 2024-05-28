@@ -2,6 +2,8 @@ abvs
 awslabs
 bottleo
 Clicquot
+ctimeout
+CTIMEOUT
 dbname
 godotenv
 gqlparser

@@ -1,6 +1,6 @@
 package populate
 
-func convertSetToArr(m map[string]struct{}) []interface{} {
+func convertSetToArr[T any](m map[string]T) []interface{} {
 	arr := make([]interface{}, 0)
 
 	for k := range m {
@@ -21,6 +21,8 @@ func convertToInterfaceSlice[T any](names []T) []interface{} {
 }
 
 // batchProducts splits the array into chunks of 32767
+// (half the PostgreSQL limit for the number of parameters in
+// a query since we are passing in two parameters for each product)
 func batchProducts(batch []Product) [][]Product {
 	var batches [][]Product
 

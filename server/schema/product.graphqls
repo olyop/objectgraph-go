@@ -5,6 +5,8 @@ type Product {
 	createdAt: Timestamp!
 
 	price: Price!
+	promotionDiscount: Price
+	promotionDiscountMultiple: Int
 	volume: Int
 	abv: Float
 	brand: Brand!

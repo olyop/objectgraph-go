@@ -1,0 +1,6 @@
+type Classification {
+	classificationID: UUID!
+	name: String!
+	updatedAt: Timestamp
+	createdAt: Timestamp!
+}

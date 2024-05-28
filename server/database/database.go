@@ -15,13 +15,16 @@ func Connect() {
 	database := os.Getenv("POSTGRES_DATABASE")
 	username := os.Getenv("POSTGRES_USERNAME")
 	password := os.Getenv("POSTGRES_PASSWORD")
+	ctimeout := os.Getenv("POSTGRES_CTIMEOUT")
 
-	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s", hostname, username, password, database)
+	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s connect_timeout=%s", hostname, username, password, database, ctimeout)
 
 	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		panic(err)
 	}
+
+	db.SetMaxOpenConns(99)
 
 	err = db.Ping()
 	if err != nil {

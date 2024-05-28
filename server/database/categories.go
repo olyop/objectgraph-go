@@ -9,10 +9,11 @@ import (
 )
 
 type Category struct {
-	CategoryID uuid.UUID
-	Name       string
-	UpdatedAt  time.Time
-	CreatedAt  time.Time
+	CategoryID       uuid.UUID
+	Name             string
+	ClassificationID uuid.UUID
+	UpdatedAt        time.Time
+	CreatedAt        time.Time
 }
 
 func SelectCategoriesByProductID(productID uuid.UUID) ([]*Category, error) {
@@ -33,6 +34,7 @@ func SelectCategoriesByProductID(productID uuid.UUID) ([]*Category, error) {
 		cols := []interface{}{
 			&category.CategoryID,
 			&category.Name,
+			&category.ClassificationID,
 			&updatedAt,
 			&createdAt,
 		}

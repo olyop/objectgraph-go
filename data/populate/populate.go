@@ -15,10 +15,10 @@ func Execute(data *importdata.Data) {
 	classifications := populateClassifications(data)
 	categories := populateCategories(data, classifications)
 	classificationsToBrands, brands := populateBrands(data)
-	populateProducts(data, classificationsToBrands, brands, categories)
+	products := populateProducts(data, classificationsToBrands, brands, categories)
 
-	fmt.Println(len(classifications))
-	fmt.Println(len(categories))
-	fmt.Println(len(classificationsToBrands))
-	fmt.Println(len(brands))
+	fmt.Println("Classifications:", len(classifications))
+	fmt.Println("Categories:", len(categories))
+	fmt.Println("Brands:", len(brands))
+	fmt.Println("Products:", len(products))
 }

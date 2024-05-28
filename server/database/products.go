@@ -9,14 +9,16 @@ import (
 )
 
 type Product struct {
-	ProductID uuid.UUID
-	Name      string
-	BrandID   uuid.UUID
-	UpdatedAt time.Time
-	CreatedAt time.Time
-	Price     int64
-	ABV       sql.NullFloat64
-	Volume    sql.NullInt64
+	ProductID                 uuid.UUID
+	Name                      string
+	BrandID                   uuid.UUID
+	Price                     int64
+	ABV                       sql.NullFloat64
+	Volume                    sql.NullInt32
+	PromotionDiscount         sql.NullInt64
+	PromotionDiscountMultiple sql.NullInt32
+	UpdatedAt                 time.Time
+	CreatedAt                 time.Time
 }
 
 func SelectProducts() ([]*Product, error) {
@@ -41,6 +43,8 @@ func SelectProducts() ([]*Product, error) {
 			&product.Price,
 			&product.ABV,
 			&product.Volume,
+			&product.PromotionDiscount,
+			&product.PromotionDiscountMultiple,
 			&updatedAt,
 			&createdAt,
 		}
@@ -76,6 +80,8 @@ func SelectProductByID(productID uuid.UUID) (*Product, error) {
 		&product.Price,
 		&product.ABV,
 		&product.Volume,
+		&product.PromotionDiscount,
+		&product.PromotionDiscountMultiple,
 		&updatedAt,
 		&createdAt,
 	}

@@ -10,73 +10,22 @@ var cache Cache = Cache{
 	groups: make(CacheGroups),
 }
 
-func Get[T any](groupKey string, cacheKey string) (*T, bool) {
+func Get[T any](groupKey string, cacheKey string) (T, bool) {
 	group := handleGroup(groupKey)
 
-	var value *T
+	var value T
 
-	item, exists := group.values[cacheKey]
-	if !exists {
-		return nil, false
-	}
-
-	value = item.value.(*T)
-
-	// expired cache item
-	if item.expires.Before(time.Now()) {
-		group.mu.Lock()
-
-		// check again in case another goroutine updated the item
-		item, exists = group.values[cacheKey]
-		if !exists {
-			// the cache item was deleted by another goroutine
-			group.mu.Unlock()
-
-			return nil, false
-		}
-
-		value = item.value.(*T)
-
-		delete(group.values, cacheKey)
-
-		group.mu.Unlock()
-
-		return value, false
-	}
-
-	return value, true
-}
-
-func GetList[T any](groupKey string, cacheKey string) ([]*T, bool) {
-	group := handleGroup(groupKey)
-
-	var value []*T
-
-	item, exists := group.values[cacheKey]
+	mapItem, exists := group.Load(cacheKey)
 	if !exists {
 		return value, false
 	}
 
-	value = item.value.([]*T)
+	item := mapItem.(*CacheItem)
+	value = item.value.(T)
 
-	// expired cache item
 	if item.expires.Before(time.Now()) {
-		group.mu.Lock()
-
-		// check again in case another goroutine updated the item
-		item, exists = group.values[cacheKey]
-		if !exists {
-			// the cache item was deleted by another goroutine
-			group.mu.Unlock()
-
-			return value, false
-		}
-
-		value = item.value.([]*T)
-
-		delete(group.values, cacheKey)
-
-		group.mu.Unlock()
+		// expired cache item
+		group.Delete(cacheKey)
 
 		return value, false
 	}
@@ -87,30 +36,25 @@ func GetList[T any](groupKey string, cacheKey string) ([]*T, bool) {
 func Set(groupKey string, cacheKey string, value any, ttl time.Duration) {
 	group := handleGroup(groupKey)
 
-	group.mu.Lock()
-
-	group.values[cacheKey] = &CacheItem{
+	group.Store(cacheKey, &CacheItem{
 		value:   value,
 		expires: time.Now().Add(ttl),
-	}
-
-	group.mu.Unlock()
+	})
 }
 
 func Exists(groupKey string, cacheKey string) bool {
 	group := handleGroup(groupKey)
 
-	item, exists := group.values[cacheKey]
+	mapItem, exists := group.Load(cacheKey)
 	if !exists {
 		return false
 	}
 
+	item := mapItem.(*CacheItem)
+
 	if item.expires.Before(time.Now()) {
-		group.mu.Lock()
-
-		delete(group.values, cacheKey)
-
-		group.mu.Unlock()
+		// expired cache item
+		group.Delete(cacheKey)
 
 		return false
 	}
@@ -118,7 +62,7 @@ func Exists(groupKey string, cacheKey string) bool {
 	return true
 }
 
-func handleGroup(groupKey string) *CacheGroup {
+func handleGroup(groupKey string) *sync.Map {
 	group, initialized := cache.groups[groupKey]
 
 	if !initialized {
@@ -131,10 +75,7 @@ func handleGroup(groupKey string) *CacheGroup {
 			return group
 		}
 
-		group = &CacheGroup{
-			mu:     sync.Mutex{},
-			values: make(CacheValues),
-		}
+		group = new(sync.Map)
 
 		cache.groups[groupKey] = group
 
@@ -149,14 +90,7 @@ type Cache struct {
 	groups CacheGroups
 }
 
-type CacheGroups map[string]*CacheGroup
-
-type CacheGroup struct {
-	mu     sync.Mutex
-	values CacheValues
-}
-
-type CacheValues map[string]*CacheItem
+type CacheGroups map[string]*sync.Map
 
 type CacheItem struct {
 	value   any

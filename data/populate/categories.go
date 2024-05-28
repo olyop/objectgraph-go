@@ -3,6 +3,7 @@ package populate
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
@@ -17,33 +18,39 @@ func populateCategories(data *importdata.Data, classifications map[string]string
 		panic(err)
 	}
 
-	categories := constructCategories(rows)
+	categories := categoriesRowsMapper(rows)
 
-	logCategories(categories)
+	log.Printf("Populated %d categories", len(categories))
 
 	return categories
 }
 
 func createCategoriesQuery(data *importdata.Data, classifications map[string]string) (string, []interface{}) {
 	var sql strings.Builder
-	params := make([]string, 0)
+	paramsIndex := 0
+	params := initializeParams(data)
 
 	sql.WriteString("INSERT INTO categories (category_name, classification_id) VALUES ")
 
 	i := 0
 	for classification, categories := range data.ClassificationToCategories {
-		for j, category := range categories {
-			paramsLength := len(params) + 1
+		params[paramsIndex] = classifications[classification]
+		classificationIndex := paramsIndex
+		paramsIndex++
 
-			row := fmt.Sprintf("($%d,$%d)", paramsLength, paramsLength+1)
+		for categoryIndex, category := range categories {
+			values := fmt.Sprintf("($%d, $%d)", paramsIndex+1, classificationIndex+1)
 
-			if j < len(categories)-1 {
-				sql.WriteString(fmt.Sprintf("%s,", row))
+			var row string
+			if categoryIndex < len(categories)-1 {
+				row = fmt.Sprintf("%s,", values)
 			} else {
-				sql.WriteString(row)
+				row = values
 			}
+			sql.WriteString(row)
 
-			params = append(params, category, classifications[classification])
+			params[paramsIndex] = category
+			paramsIndex++
 		}
 
 		if i < len(data.ClassificationToCategories)-1 {
@@ -58,7 +65,19 @@ func createCategoriesQuery(data *importdata.Data, classifications map[string]str
 	return sql.String(), convertToInterfaceSlice(params)
 }
 
-func constructCategories(rows *sql.Rows) map[string]string {
+func initializeParams(data *importdata.Data) []string {
+	count := 0
+
+	count += len(data.ClassificationToCategories)
+
+	for _, categories := range data.ClassificationToCategories {
+		count += len(categories)
+	}
+
+	return make([]string, count)
+}
+
+func categoriesRowsMapper(rows *sql.Rows) map[string]string {
 	categories := make(map[string]string)
 
 	for rows.Next() {
@@ -76,14 +95,13 @@ func constructCategories(rows *sql.Rows) map[string]string {
 	return categories
 }
 
-func logCategories(categories map[string]string) {
-	for categoryName, categoryID := range categories {
-		fmt.Printf("Added Category: %v, %v\n", categoryID, categoryName)
-	}
-}
-
 func clearCategories() {
-	_, err := database.DB.Exec("DELETE FROM categories")
+	_, err := database.DB.Exec("DELETE FROM products_categories")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = database.DB.Exec("DELETE FROM categories")
 	if err != nil {
 		panic(err)
 	}

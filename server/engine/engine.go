@@ -1,19 +1,27 @@
 package engine
 
 import (
-	"github.com/olyop/graphql-go/server/engine/cache"
+	"fmt"
+	"sync"
 	"time"
+
+	"github.com/olyop/graphql-go/server/engine/cache"
 )
 
-func Resolver[R any](options ResolverOptions[R]) (*R, error) {
-	cacheResult, found := cache.Get[R](options.GroupKey, options.CacheKey)
+func Resolver[R any](options ResolverOptions[R]) (R, error) {
+	mu := getResolverMutext(fmt.Sprintf("%s-%s", options.GroupKey, options.CacheKey))
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	result, found := cache.Get[R](options.GroupKey, options.CacheKey)
 	if found {
-		return cacheResult, nil
+		return result, nil
 	}
 
 	result, err := options.Retrieve()
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
 	cache.Set(options.GroupKey, options.CacheKey, result, options.Duration)
@@ -21,32 +29,21 @@ func Resolver[R any](options ResolverOptions[R]) (*R, error) {
 	return result, nil
 }
 
-func Resolvers[R any](options ResolversOptions[R]) ([]*R, error) {
-	cacheResult, found := cache.GetList[R](options.GroupKey, options.CacheKey)
-	if found {
-		return cacheResult, nil
+var resolverMutexMap = new(sync.Map)
+
+func getResolverMutext(key string) *sync.Mutex {
+	mu, found := resolverMutexMap.Load(key)
+	if !found {
+		mu = &sync.Mutex{}
+		resolverMutexMap.Store(key, mu)
 	}
 
-	result, err := options.Retrieve()
-	if err != nil {
-		return nil, err
-	}
-
-	cache.Set(options.GroupKey, options.CacheKey, result, options.Duration)
-
-	return result, nil
+	return mu.(*sync.Mutex)
 }
 
 type ResolverOptions[T any] struct {
 	GroupKey string
 	Duration time.Duration
 	CacheKey string
-	Retrieve func() (*T, error)
-}
-
-type ResolversOptions[T any] struct {
-	GroupKey string
-	Duration time.Duration
-	CacheKey string
-	Retrieve func() ([]*T, error)
+	Retrieve func() (T, error)
 }

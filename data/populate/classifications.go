@@ -3,6 +3,7 @@ package populate
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
@@ -19,9 +20,9 @@ func populateClassifications(data *importdata.Data) map[string]string {
 
 	defer rows.Close()
 
-	classifications := classificationsMap(rows)
+	classifications := classificationsRowsMapper(rows)
 
-	logClassifications(classifications)
+	log.Printf("Populated %d classifications", len(classifications))
 
 	return classifications
 }
@@ -33,13 +34,15 @@ func createClassificationsQuery(data *importdata.Data) (string, []interface{}) {
 	sql.WriteString("INSERT INTO classifications (classification_name) VALUES ")
 
 	for i := 0; i < len(data.Classifications); i++ {
-		row := fmt.Sprintf("($%d)", i+1)
+		values := fmt.Sprintf("($%d)", i+1)
 
+		var row string
 		if i < len(data.Classifications)-1 {
-			sql.WriteString(fmt.Sprintf("%s,", row))
+			row = fmt.Sprintf("%s,", values)
 		} else {
-			sql.WriteString(row)
+			row = values
 		}
+		sql.WriteString(row)
 
 		params[i] = data.Classifications[i]
 	}
@@ -49,7 +52,7 @@ func createClassificationsQuery(data *importdata.Data) (string, []interface{}) {
 	return sql.String(), convertToInterfaceSlice(params)
 }
 
-func classificationsMap(rows *sql.Rows) map[string]string {
+func classificationsRowsMapper(rows *sql.Rows) map[string]string {
 	classifications := make(map[string]string, 0)
 
 	for rows.Next() {
@@ -65,12 +68,6 @@ func classificationsMap(rows *sql.Rows) map[string]string {
 	}
 
 	return classifications
-}
-
-func logClassifications(classifications map[string]string) {
-	for classificationName, classificationID := range classifications {
-		fmt.Printf("Added Classification: %v, %v\n", classificationID, classificationName)
-	}
 }
 
 func clearClassifications() {

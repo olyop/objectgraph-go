@@ -24,7 +24,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	schema := graphql.MustParseSchema(schemaString, &resolvers.Resolver{})
+	options := graphql.SchemaOpt(graphql.MaxParallelism(1000))
+	schema := graphql.MustParseSchema(schemaString, &resolvers.Resolver{}, options)
 
 	http.Handle("/graphql", &relay.Handler{Schema: schema})
 

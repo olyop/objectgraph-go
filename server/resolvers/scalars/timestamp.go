@@ -10,6 +10,18 @@ type Timestamp struct {
 	time.Time
 }
 
+func NewTimestamp(t time.Time) Timestamp {
+	return Timestamp{Time: t}
+}
+
+func NewNillTimestamp(t time.Time) *Timestamp {
+	if t.IsZero() {
+		return nil
+	}
+
+	return &Timestamp{Time: t}
+}
+
 func (Timestamp) ImplementsGraphQLType(name string) bool {
 	return name == "Timestamp"
 }

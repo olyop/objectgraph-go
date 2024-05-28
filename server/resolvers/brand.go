@@ -10,7 +10,7 @@ type BrandResolver struct {
 }
 
 func (r *BrandResolver) BrandID() scalars.UUID {
-	return scalars.UUID{UUID: r.Brand.BrandID}
+	return scalars.NewUUID(r.Brand.BrandID)
 }
 
 func (r *BrandResolver) Name() string {
@@ -18,13 +18,9 @@ func (r *BrandResolver) Name() string {
 }
 
 func (r *BrandResolver) UpdatedAt() *scalars.Timestamp {
-	if r.Brand.UpdatedAt.IsZero() {
-		return nil
-	}
-
-	return &scalars.Timestamp{Time: r.Brand.UpdatedAt}
+	return scalars.NewNillTimestamp(r.Brand.UpdatedAt)
 }
 
 func (r *BrandResolver) CreatedAt() scalars.Timestamp {
-	return scalars.Timestamp{Time: r.Brand.CreatedAt}
+	return scalars.NewTimestamp(r.Brand.CreatedAt)
 }

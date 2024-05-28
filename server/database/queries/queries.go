@@ -5,6 +5,7 @@ import (
 	"path"
 )
 
+var SelectClassificationByIDQuery = readSQLFile("select-classification-by-id")
 var SelectBrandByIDQuery = readSQLFile("select-brand-by-id")
 var SelectCategoriesByProductID = readSQLFile("select-categories-by-product-id")
 var SelectProductByID = readSQLFile("select-product-by-id")
