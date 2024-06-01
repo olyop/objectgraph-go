@@ -59,6 +59,15 @@ func (r *ProductResolver) Categories() ([]*CategoryResolver, error) {
 	})
 }
 
+func (r *ProductResolver) Brand(ctx context.Context) (*BrandResolver, error) {
+	return engine.Resolver(engine.ResolverOptions[*BrandResolver]{
+		GroupKey: "product-brands",
+		Duration: 15 * time.Second,
+		CacheKey: r.Product.BrandID.String(),
+		Retrieve: brandRetriever(r.Product.BrandID),
+	})
+}
+
 func categoriesRetriever(productID uuid.UUID) func() ([]*CategoryResolver, error) {
 	return func() ([]*CategoryResolver, error) {
 		categories, err := database.SelectCategoriesByProductID(productID)
@@ -74,15 +83,6 @@ func categoriesRetriever(productID uuid.UUID) func() ([]*CategoryResolver, error
 
 		return resolvers, nil
 	}
-}
-
-func (r *ProductResolver) Brand(ctx context.Context) (*BrandResolver, error) {
-	return engine.Resolver(engine.ResolverOptions[*BrandResolver]{
-		GroupKey: "product-brands",
-		Duration: 15 * time.Second,
-		CacheKey: r.Product.BrandID.String(),
-		Retrieve: brandRetriever(r.Product.BrandID),
-	})
 }
 
 func brandRetriever(brandID uuid.UUID) func() (*BrandResolver, error) {

@@ -30,6 +30,14 @@ func (r *CategoryResolver) Classification() (*ClassificationResolver, error) {
 	})
 }
 
+func (r *CategoryResolver) UpdatedAt() *scalars.Timestamp {
+	return scalars.NewNillTimestamp(r.Category.UpdatedAt)
+}
+
+func (r *CategoryResolver) CreatedAt() scalars.Timestamp {
+	return scalars.NewTimestamp(r.Category.CreatedAt)
+}
+
 func classificationRetriever(classificationID uuid.UUID) func() (*ClassificationResolver, error) {
 	return func() (*ClassificationResolver, error) {
 		classification, err := database.SelectClassificationByID(classificationID)
@@ -39,12 +47,4 @@ func classificationRetriever(classificationID uuid.UUID) func() (*Classification
 
 		return &ClassificationResolver{classification}, nil
 	}
-}
-
-func (r *CategoryResolver) UpdatedAt() *scalars.Timestamp {
-	return scalars.NewNillTimestamp(r.Category.UpdatedAt)
-}
-
-func (r *CategoryResolver) CreatedAt() scalars.Timestamp {
-	return scalars.NewTimestamp(r.Category.CreatedAt)
 }

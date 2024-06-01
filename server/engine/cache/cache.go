@@ -21,14 +21,14 @@ func Get[T any](groupKey string, cacheKey string) (T, bool) {
 	}
 
 	item := mapItem.(*CacheItem)
-	value = item.value.(T)
 
 	if item.expires.Before(time.Now()) {
-		// expired cache item
 		group.Delete(cacheKey)
 
 		return value, false
 	}
+
+	value = item.value.(T)
 
 	return value, true
 }

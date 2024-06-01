@@ -1,6 +1,11 @@
 node_modules
 
-data/tmp
+client/node_modules
+client/dist
+client/.env.development.local
+
+database/data/tmp
+database/schema/tmp
 
 server/tmp
 

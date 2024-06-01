@@ -4,11 +4,13 @@ bottleo
 Clicquot
 ctimeout
 CTIMEOUT
+daisyui
 dbname
 godotenv
 gqlparser
 gqls
 graphqlcompiler
+graphqlgo
 graphqlparser
 joho
 ollies
@@ -19,3 +21,4 @@ sslmode
 Tooheys
 uuid
 vektah
+vercel

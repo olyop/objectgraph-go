@@ -1,0 +1,28 @@
+overwrite: true
+emitLegacyCommonJSImports: false
+documents: client/src/**/*.graphql
+schema: server/schema/*.graphqls
+hooks:
+  afterAllFileWrite: prettier --write
+generates:
+  client/src/clients/graphql/generated-types.ts:
+    config:
+      avoidOptionals: true
+      immutableTypes: true
+      useTypeImports: true
+      mergeFragmentTypes: true
+      nonOptionalTypename: true
+      useImplementingTypes: true
+      flattenGeneratedTypes: true
+      defaultScalarType: unknown
+      inlineFragmentTypes: combine
+      namingConvention:
+        enumValues: change-case#upperCase
+      scalars:
+        UUID: string
+        Price: number
+        Timestamp: string
+
+    plugins:
+      - typescript
+      - typescript-operations

@@ -1,0 +1,50 @@
+{
+	"private": true,
+	"description": "GraphQL Go Client",
+	"license": "GPL-3.0",
+	"name": "graphql-go-client",
+	"type": "module",
+	"version": "1.0.0",
+	"author": {
+		"email": "oliver.plummer@outlook.com",
+		"name": "Oliver Plummer",
+		"url": "https://oliverplummer.com.au/"
+	},
+	"bugs": {
+		"email": "oliver.plummer@outlook.com",
+		"url": "https://github.com/olyop/graphql-go/issues"
+	},
+	"scripts": {
+		"build": "vite build",
+		"development": "vite"
+	},
+	"dependencies": {
+		"@heroicons/react": "2.1.1",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"react-router-dom": "6.22.3",
+		"tailwindcss": "3.4.1"
+	},
+	"devDependencies": {
+		"@oly_op/eslint-config-react": "4.3.5",
+		"@types/eslint": "8.56.5",
+		"@types/react": "18.2.66",
+		"@types/react-dom": "18.2.22",
+		"@vitejs/plugin-react-swc": "3.6.0",
+		"autoprefixer": "10.4.18",
+		"npm-check-updates": "16.14.17",
+		"postcss": "8.4.35",
+		"postcss-load-config": "5.0.3",
+		"ts-node": "10.9.2",
+		"vite": "5.1.6",
+		"vite-plugin-checker": "0.6.4"
+	},
+	"engines": {
+		"node": "21.6.2",
+		"npm": "10.4.0"
+	},
+	"volta": {
+		"node": "21.6.2",
+		"npm": "10.4.0"
+	}
+}

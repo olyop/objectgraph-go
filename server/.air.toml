@@ -1,2 +1,3 @@
 [build]
   include_ext = ["go", "toml", "graphqls", "sql", "html"]
+  
