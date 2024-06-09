@@ -15,12 +15,8 @@
 	},
 	"homepage": "https://github.com/olyop/graphql-go#readme",
 	"volta": {
-		"node": "21.6.2",
-		"npm": "10.4.0"
-	},
-	"engines": {
-		"node": "21.6.2",
-		"npm": "10.4.0"
+		"node": "20.14.0",
+		"npm": "10.8.1"
 	},
 	"devDependencies": {
 		"@graphql-codegen/add": "5.0.2",
@@ -29,12 +25,22 @@
 		"@graphql-codegen/near-operation-file-preset": "3.0.0",
 		"@graphql-codegen/typescript": "4.0.7",
 		"@graphql-codegen/typescript-resolvers": "4.1.0",
-		"@oly_op/cspell-dict": "1.1.12",
-		"@oly_op/eslint-config": "6.7.20",
+		"@oly_op/cspell-dict": "1.1.14",
+		"@oly_op/eslint-config": "6.7.23",
 		"@oly_op/eslint-config-graphql": "1.1.0",
+		"@oly_op/eslint-config-react": "4.3.11",
 		"@oly_op/prettier-config": "1.9.5",
-		"@oly_op/tsconfig": "1.2.1",
+		"@oly_op/tsconfig": "1.2.2",
 		"@parcel/watcher": "2.4.1",
-		"npm-check-updates": "16.14.20"
+		"@parcel/watcher-linux-x64-glibc": "2.4.1",
+		"npm-check-updates": "16.14.20",
+		"ts-node": "10.9.2"
+	},
+	"overrides": {
+		"eslint-config-airbnb-typescript": {
+			"eslint": "8.57.0",
+			"@typescript-eslint/parser": "7.12.0",
+			"@typescript-eslint/eslint-plugin": "7.12.0"
+		}
 	}
 }

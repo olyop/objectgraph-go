@@ -18,14 +18,14 @@ func (UUID) ImplementsGraphQLType(name string) bool {
 	return name == "UUID"
 }
 
-func (t *UUID) UnmarshalGraphQL(input interface{}) error {
+func (v *UUID) UnmarshalGraphQL(input interface{}) error {
 	switch input := input.(type) {
 	case string:
 		u, err := uuid.Parse(input)
 		if err != nil {
 			return err
 		}
-		t.UUID = u
+		v.UUID = u
 		return nil
 	default:
 		return fmt.Errorf("wrong type")

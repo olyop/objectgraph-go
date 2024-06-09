@@ -1,6 +1,3 @@
-
-.PHONY: codegen rds-start rds-stop development-run development-server development-client qa
-
 codegen:
 	npx graphql-codegen-esm -w
 
@@ -10,16 +7,20 @@ rds-start:
 rds-stop:
 	aws rds stop-db-instance --db-instance-identifier testing
 
+integration-test:
+	cd server/test && go run .
+
 development:
 	tmux \; \
 		new-session -d -s dev-session 'cd server && air' \; \
-		split-window -v 'cd client && npm run dev' \; \
+		split-window -h 'cd client && npm run development' \; \
+		split-window -v 'npx graphql-codegen-esm -w' \; \
 		select-pane -t 0 \; \
 		attach-session -t dev-session
 
 qa:
 	tmux \; \
 		new-session -d -s qa-session 'cd server && go run .' \; \
-		split-window -v 'cd client && npm run build && npm run start' \; \
+		split-window -h 'cd client && npm run build && npm run start' \; \
 		select-pane -t 0 \; \
 		attach-session -t qa-session

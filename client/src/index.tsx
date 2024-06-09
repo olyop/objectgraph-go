@@ -1,9 +1,12 @@
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 
+import { ApolloProvider } from "@/clients/apollo";
+import { Routes } from "@/routes";
+
 import "./index.css";
-import { Main } from "./main";
 
 const container = document.getElementById("root");
 
@@ -13,4 +16,10 @@ if (!container) {
 
 const root = createRoot(container);
 
-root.render(<Main />);
+root.render(
+	<BrowserRouter>
+		<ApolloProvider>
+			<Routes />
+		</ApolloProvider>
+	</BrowserRouter>,
+);

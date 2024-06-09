@@ -1,3 +1,4 @@
 {
-	"extends": "@oly_op/tsconfig"
+	"extends": "@oly_op/tsconfig",
+	"include": ["codegen.ts", "src"]
 }

@@ -1,5 +1,5 @@
 {
-	"extends": ["@oly_op/eslint-config-react", "../.eslintrc.base.json"],
+	"extends": ["../.eslintrc.json"],
 	"rules": {
 		"react/react-in-jsx-scope": "off",
 		"unicorn/number-literal-case": "off"

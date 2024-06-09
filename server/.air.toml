@@ -1,3 +1,4 @@
 [build]
-  include_ext = ["go", "toml", "graphqls", "sql", "html"]
+  include_ext = ["go", "mod", "toml", "sql", "graphqls"]
+  exclude_dir = ["tests"]
   

@@ -4,6 +4,9 @@ import { readFile } from "node:fs/promises";
 import reactSwc from "@vitejs/plugin-react-swc";
 import { Plugin, UserConfig, defineConfig, loadEnv } from "vite";
 import checker from "vite-plugin-checker";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+import { graphQL } from "./vite/vite-plugin-graphql";
 
 type Mode = "development" | "production";
 
@@ -31,7 +34,7 @@ export default defineConfig(async options => {
 	process.env = { ...process.env, ...environmentVariables };
 
 	const config: UserConfig = {
-		plugins: [reactSwc(), checker(checkerOptions)],
+		plugins: [tsconfigPaths(), reactSwc(), checker(checkerOptions), graphQL()],
 		define: {
 			__DEV__: JSON.stringify(mode === "development"),
 			"globalThis.__DEV__": JSON.stringify(mode === "development"),

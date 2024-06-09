@@ -9,7 +9,10 @@
 		"noEmit": true,
 		"jsx": "react",
 		"jsxFactory": "createElement",
-		"types": ["vite/client"]
+		"types": ["vite/client"],
+		"paths": {
+			"@/*": ["./src/*"]
+		}
 	},
 	"include": ["src"]
 }

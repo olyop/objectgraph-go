@@ -12,8 +12,10 @@ gqls
 graphqlcompiler
 graphqlgo
 graphqlparser
+inmemorycache
 joho
 ollies
+patrickmn
 postgres
 redis
 Sauvignon

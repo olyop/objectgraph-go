@@ -1,49 +1,26 @@
 package engine
 
 import (
-	"fmt"
-	"sync"
 	"time"
 
-	"github.com/olyop/graphql-go/server/engine/cache"
+	"github.com/olyop/graphql-go/server/engine/distributedcache"
 )
 
-func Resolver[R any](options ResolverOptions[R]) (R, error) {
-	mu := getResolverMutext(fmt.Sprintf("%s-%s", options.GroupKey, options.CacheKey))
+var retrievers RetrieverMap
+var cacheDurations map[string]time.Duration
 
-	mu.Lock()
-	defer mu.Unlock()
-
-	result, found := cache.Get[R](options.GroupKey, options.CacheKey)
-	if found {
-		return result, nil
-	}
-
-	result, err := options.Retrieve()
-	if err != nil {
-		return result, err
-	}
-
-	cache.Set(options.GroupKey, options.CacheKey, result, options.Duration)
-
-	return result, nil
+func Initialize() {
+	distributedcache.Connect()
 }
 
-var resolverMutexMap = new(sync.Map)
-
-func getResolverMutext(key string) *sync.Mutex {
-	mu, found := resolverMutexMap.Load(key)
-	if !found {
-		mu = &sync.Mutex{}
-		resolverMutexMap.Store(key, mu)
-	}
-
-	return mu.(*sync.Mutex)
+func RegisterRetrievers(r RetrieverMap) {
+	retrievers = r
 }
 
-type ResolverOptions[T any] struct {
-	GroupKey string
-	Duration time.Duration
-	CacheKey string
-	Retrieve func() (T, error)
+func RegisterCacheDurations(d map[string]time.Duration) {
+	cacheDurations = d
+}
+
+func Close() {
+	distributedcache.Close()
 }

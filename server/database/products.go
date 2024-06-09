@@ -87,7 +87,9 @@ func SelectProductByID(productID uuid.UUID) (*Product, error) {
 	}
 
 	err := row.Scan(cols...)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
 

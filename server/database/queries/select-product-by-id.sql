@@ -1,7 +1,7 @@
 SELECT
 	products.product_id,
 	products.product_name,
-	brands.brand_name,
+	brands.brand_id,
 	prices.price_value,
 	promotions.promotion_discount,
 	promotions.promotion_discount_multiple,

@@ -11,8 +11,8 @@ func main() {
 	loadEnv()
 
 	database.Connect()
+	defer database.Close()
 
-	// read the file /schema/schema.sql
 	schemaFile, err := os.ReadFile("schema.sql")
 	if err != nil {
 		panic(err)

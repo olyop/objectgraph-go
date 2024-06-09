@@ -1,37 +1,43 @@
 package main
 
 import (
-	"context"
 	"log"
-	"os"
-	"time"
 
-	"github.com/machinebox/graphql"
+	"github.com/olyop/graphql-go/tests/fs"
+	"github.com/olyop/graphql-go/tests/graphql"
+	"github.com/olyop/graphql-go/tests/utils"
 )
 
 func main() {
-	graphQLClient := graphql.NewClient("http://localhost:8080/graphql")
+	log.SetFlags(log.Lshortfile)
 
-	for i := 0; i < 10; i++ {
-		TestGetProductsQuery(graphQLClient)
+	graphql.InitializeClient()
 
-		time.Sleep(1 * time.Second)
-	}
+	runGraphQlTests()
 }
 
-func TestGetProductsQuery(client *graphql.Client) {
-	file, err := os.ReadFile("test.graphql")
-	if err != nil {
-		log.Fatalf("Error opening file: %v", err)
+func runGraphQlTests() {
+	testGetProduct()
+	testGetProductsLoad()
+}
+
+func testGetProduct() {
+	file := fs.ImportTestFile("get-product.graphql")
+
+	graphql.RunQuery(file)
+}
+
+func testGetProductsLoad() {
+	file := fs.ImportTestFile("get-products.graphql")
+
+	graphql.RunQuery(file)
+
+	fn := func() {
+		graphql.RunQuery(file)
 	}
 
-	contents := string(file)
-	request := graphql.NewRequest(contents)
-
-	ctx := context.Background()
-
-	err = client.Run(ctx, request, &struct{}{})
-	if err != nil {
-		log.Fatalf("Error getting products: %v", err)
-	}
+	utils.Iterate(fn, utils.IterateOptions{
+		Iterations: 100,
+		Pace:       100,
+	})
 }

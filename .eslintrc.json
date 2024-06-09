@@ -2,7 +2,10 @@
 	"overrides": [
 		{
 			"files": ["*.ts", "*.tsx"],
-			"extends": "@oly_op/eslint-config"
+			"extends": ["@oly_op/eslint-config", "@oly_op/eslint-config-react"],
+			"parserOptions": {
+				"project": "./tsconfig.json"
+			}
 		},
 		{
 			"files": ["*.graphql", "*.gql", "*.graphqls"],

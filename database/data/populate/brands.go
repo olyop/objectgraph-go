@@ -31,13 +31,15 @@ func populateBrands(data *importdata.Data) (map[string][]string, map[string]stri
 	sql.WriteString("INSERT INTO brands (brand_name) VALUES ")
 
 	for i := 1; i <= len(brandsSet); i++ {
-		row := fmt.Sprintf("($%d)", i)
+		values := fmt.Sprintf("($%d)", i)
 
+		var row string
 		if i < len(brandsSet) {
-			sql.WriteString(fmt.Sprintf("%s,", row))
+			row = fmt.Sprintf("%s,", row)
 		} else {
-			sql.WriteString(row)
+			row = values
 		}
+		sql.WriteString(row)
 	}
 
 	sql.WriteString(" RETURNING brand_id, brand_name")

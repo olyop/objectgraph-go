@@ -1,4 +1,4 @@
-package schema
+package graphql
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ var validExtensions = map[string]struct{}{
 	".gqls":     {},
 }
 
-func ReadSourceFiles(path string) (schema string, err error) {
+func ReadSchema(path string) (schema string, err error) {
 	sourceFiles := make(map[string]*SourceFile)
 
-	err = filepath.WalkDir(path, walk(sourceFiles))
+	err = filepath.WalkDir(path, walkSourceFile(sourceFiles))
 	if err != nil {
 		return schema, fmt.Errorf("failed to walk directory %s: %w", path, err)
 	}
@@ -29,7 +29,7 @@ func ReadSourceFiles(path string) (schema string, err error) {
 	return schema, err
 }
 
-func walk(sourceFiles map[string]*SourceFile) fs.WalkDirFunc {
+func walkSourceFile(sourceFiles map[string]*SourceFile) fs.WalkDirFunc {
 	return func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err

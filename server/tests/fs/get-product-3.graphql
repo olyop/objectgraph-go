@@ -1,0 +1,31 @@
+query {
+	getProductByID(productID: "0b89b89b-458e-4b41-82a6-9302a5b3733d") {
+		productID
+		name
+		price
+		promotionDiscount
+		promotionDiscountMultiple
+		volume
+		abv
+		updatedAt
+		createdAt
+		brand {
+			brandID
+			name
+			updatedAt
+			createdAt
+		}
+		categories {
+			categoryID
+			name
+			classification {
+				classificationID
+				name
+				updatedAt
+				createdAt
+			}
+			updatedAt
+			createdAt
+		}
+	}
+}
