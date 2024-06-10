@@ -7,8 +7,9 @@ type Product {
 	price: Price!
 	promotionDiscount: Price
 	promotionDiscountMultiple: Int
+	promotionPrice: Price!
 	volume: Int
-	abv: Float
+	abv: Int
 	brand: Brand!
 	categories: [Category!]!
 }

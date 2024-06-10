@@ -7,19 +7,19 @@ import (
 )
 
 type Timestamp struct {
-	time.Time
+	Value time.Time
 }
 
 func NewTimestamp(t time.Time) Timestamp {
-	return Timestamp{Time: t}
+	return Timestamp{Value: t}
 }
 
-func NewNillTimestamp(t time.Time) *Timestamp {
+func NewNilTimestamp(t time.Time) *Timestamp {
 	if t.IsZero() {
 		return nil
 	}
 
-	return &Timestamp{Time: t}
+	return &Timestamp{Value: t}
 }
 
 func (Timestamp) ImplementsGraphQLType(name string) bool {
@@ -29,13 +29,12 @@ func (Timestamp) ImplementsGraphQLType(name string) bool {
 func (t *Timestamp) UnmarshalGraphQL(input interface{}) error {
 	switch input := input.(type) {
 	case string:
-		// convert from string representation of a int
 		intValue, err := strconv.ParseInt(input, 10, 64)
 		if err != nil {
 			return err
 		}
 
-		t.Time = time.Unix(intValue, 0)
+		t.Value = time.UnixMilli(intValue)
 
 		return nil
 	default:
@@ -43,6 +42,21 @@ func (t *Timestamp) UnmarshalGraphQL(input interface{}) error {
 	}
 }
 
+func (t *Timestamp) UnmarshalJSON(data []byte) error {
+	content := string(data)
+	str := content[1 : len(content)-1]
+	println(str)
+
+	intValue, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	t.Value = time.UnixMilli(intValue)
+
+	return nil
+}
+
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%d\"", t.UnixMilli())), nil
+	return []byte(fmt.Sprintf("\"%d\"", t.Value.UnixMilli())), nil
 }

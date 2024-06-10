@@ -1,12 +1,15 @@
 package database
 
 import (
-	"database/sql"
+	"context"
+	_ "embed"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database/queries"
 )
+
+//go:embed queries/select-categories-by-product-id.sql
+var selectCategoriesByProductID string
 
 type Category struct {
 	CategoryID       uuid.UUID
@@ -16,8 +19,8 @@ type Category struct {
 	CreatedAt        time.Time
 }
 
-func SelectCategoriesByProductID(productID uuid.UUID) ([]*Category, error) {
-	rows, err := db.Query(queries.SelectCategoriesByProductID, productID)
+func SelectCategoriesByProductID(ctx context.Context, productID uuid.UUID) ([]*Category, error) {
+	rows, err := db.QueryContext(ctx, selectCategoriesByProductID, productID)
 	if err != nil {
 		return nil, err
 	}
@@ -27,30 +30,7 @@ func SelectCategoriesByProductID(productID uuid.UUID) ([]*Category, error) {
 	categories := make([]*Category, 0)
 
 	for rows.Next() {
-		var category Category
-		var updatedAt sql.NullInt64
-		var createdAt int64
-
-		cols := []interface{}{
-			&category.CategoryID,
-			&category.Name,
-			&category.ClassificationID,
-			&updatedAt,
-			&createdAt,
-		}
-
-		err := rows.Scan(cols...)
-		if err != nil {
-			return nil, err
-		}
-
-		if updatedAt.Valid {
-			category.UpdatedAt = time.UnixMilli(updatedAt.Int64)
-		}
-
-		category.CreatedAt = time.UnixMilli(createdAt)
-
-		categories = append(categories, &category)
+		categories = append(categories, categoryRowMapper(rows))
 	}
 
 	return categories, nil

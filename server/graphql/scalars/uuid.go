@@ -7,11 +7,11 @@ import (
 )
 
 type UUID struct {
-	uuid.UUID
+	Value uuid.UUID
 }
 
 func NewUUID(uuid uuid.UUID) UUID {
-	return UUID{UUID: uuid}
+	return UUID{Value: uuid}
 }
 
 func (UUID) ImplementsGraphQLType(name string) bool {
@@ -25,13 +25,27 @@ func (v *UUID) UnmarshalGraphQL(input interface{}) error {
 		if err != nil {
 			return err
 		}
-		v.UUID = u
+		v.Value = u
 		return nil
 	default:
 		return fmt.Errorf("wrong type")
 	}
 }
 
+func (t *UUID) UnmarshalJSON(data []byte) error {
+	content := string(data)
+	str := content[1 : len(content)-1]
+
+	u, err := uuid.Parse(str)
+	if err != nil {
+		return err
+	}
+
+	t.Value = u
+
+	return nil
+}
+
 func (t UUID) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, t.UUID.String())), nil
+	return []byte(fmt.Sprintf(`"%s"`, t.Value.String())), nil
 }

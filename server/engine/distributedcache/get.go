@@ -3,7 +3,6 @@ package distributedcache
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -22,7 +21,6 @@ func Get[R any](ctx context.Context, cacheKey string) (R, bool, error) {
 
 	err = json.Unmarshal(result, &value)
 	if err != nil {
-		fmt.Println(cacheKey, string(result))
 		return value, false, err
 	}
 

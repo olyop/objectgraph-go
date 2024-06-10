@@ -10,26 +10,24 @@ import (
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/olyop/graphql-go/server/engine"
-	"github.com/olyop/graphql-go/server/graphql/resolvers"
+	"github.com/olyop/graphql-go/server/graphql/retreivers"
+	"github.com/olyop/graphql-go/server/graphql/schema"
 )
 
 func CreateHandler() http.HandlerFunc {
-	engine.RegisterRetrievers(retreiversMap)
-
-	engine.RegisterCacheDurations(map[string]time.Duration{
-		"catalog": 15 * time.Minute,
+	engine.RegisterRetrievers(engine.RetrieverMap{
+		"get-brand-by-id":          retreivers.GetBrandByID,
+		"get-products":             retreivers.GetProducts,
+		"get-product-by-id":        retreivers.GetProductByID,
+		"get-product-categories":   retreivers.GetProductCategories,
+		"get-classification-by-id": retreivers.GetClassificationByID,
 	})
 
-	schemaString, err := ReadSchema("./schema")
-	if err != nil {
-		log.Fatal(err)
-	}
+	engine.RegisterCacheDurations(map[string]time.Duration{
+		"catalog": 45 * time.Second,
+	})
 
-	options := []graphql.SchemaOpt{
-		graphql.MaxParallelism(20),
-	}
-
-	schema := graphql.MustParseSchema(schemaString, &resolvers.Resolver{}, options...)
+	schema := schema.Parse()
 
 	resolverMutexMap := new(sync.Map)
 
@@ -49,7 +47,6 @@ func CreateHandler() http.HandlerFunc {
 		)
 
 		var body graphQLBody
-
 		err := json.NewDecoder(request.Body).Decode(&body)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
@@ -62,6 +59,10 @@ func CreateHandler() http.HandlerFunc {
 			body.OperationName,
 			body.Variables,
 		)
+
+		for _, err := range response.Errors {
+			log.Default().Println("graphql: " + err.Message)
+		}
 
 		responseJSON, err := json.Marshal(response)
 		if err != nil {

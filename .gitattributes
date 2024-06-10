@@ -8,4 +8,7 @@
 *.graphqls linguist-language=graphql
 
 *.tsx linguist-detectable=true
-*.tsx linguist-language=tsx
+*.tsx linguist-language=typescript
+
+*.cjs linguist-detectable=true
+*.cjs linguist-language=typescript

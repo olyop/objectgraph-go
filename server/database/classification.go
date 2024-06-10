@@ -1,12 +1,15 @@
 package database
 
 import (
-	"database/sql"
+	"context"
+	_ "embed"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database/queries"
 )
+
+//go:embed queries/select-classification-by-id.sql
+var selectClassificationByID string
 
 type Classification struct {
 	ClassificationID uuid.UUID
@@ -15,30 +18,17 @@ type Classification struct {
 	CreatedAt        time.Time
 }
 
-func SelectClassificationByID(classificationID uuid.UUID) (*Classification, error) {
-	row := db.QueryRow(queries.SelectClassificationByIDQuery, classificationID)
-
-	var classification Classification
-	var updatedAt sql.NullInt64
-	var createdAt int64
-
-	cols := []interface{}{
-		&classification.ClassificationID,
-		&classification.Name,
-		&updatedAt,
-		&createdAt,
-	}
-
-	err := row.Scan(cols...)
+func SelectClassificationByID(ctx context.Context, classificationID uuid.UUID) (*Classification, error) {
+	rows, err := db.QueryContext(ctx, selectClassificationByID, classificationID)
 	if err != nil {
 		return nil, err
 	}
 
-	if updatedAt.Valid {
-		classification.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+	defer rows.Close()
+
+	if rows.Next() {
+		return classificationRowMapper(rows), nil
 	}
 
-	classification.CreatedAt = time.UnixMilli(createdAt)
-
-	return &classification, nil
+	return nil, nil
 }

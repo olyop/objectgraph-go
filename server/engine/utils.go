@@ -1,14 +1,34 @@
 package engine
 
 import (
+	"log"
 	"sort"
+	"time"
 )
 
 const (
 	emptyCacheKey = "none"
 )
 
-func determineCacheKey(options ResolverOptions) string {
+func getCacheDuration(options ResolverOptions) time.Duration {
+	cacheDuration, cacheDurationFound := cacheDurations[options.CacheDuration]
+	if !cacheDurationFound {
+		log.Fatal("cache duration not found")
+	}
+
+	return cacheDuration
+}
+
+func getRetriever(options ResolverOptions) Retriever {
+	retriever, retrieverFound := retrievers[options.RetrieverKey]
+	if !retrieverFound {
+		log.Fatal("retriever not found")
+	}
+
+	return retriever
+}
+
+func getCacheKey(options ResolverOptions) string {
 	var cacheKey string
 
 	for _, arg := range sortMapAlphabetically(options.RetrieverArgs) {
@@ -22,7 +42,7 @@ func determineCacheKey(options ResolverOptions) string {
 	return concatCacheKey(options.RetrieverKey, cacheKey)
 }
 
-func sortMapAlphabetically(m map[string]string) [][2]string {
+func sortMapAlphabetically(m RetrieverArgs) [][2]string {
 	sorted := make([][2]string, 0, len(m))
 
 	for key, value := range m {

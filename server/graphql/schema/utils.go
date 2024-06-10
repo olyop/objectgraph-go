@@ -1,20 +1,17 @@
-package graphql
+package schema
 
 import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
+	"runtime"
 )
 
-var validExtensions = map[string]struct{}{
-	".graphql":  {},
-	".gql":      {},
-	".graphqls": {},
-	".gqls":     {},
-}
+func readSchema() (schema string, err error) {
+	path := getDirectory()
 
-func ReadSchema(path string) (schema string, err error) {
 	sourceFiles := make(map[string]*SourceFile)
 
 	err = filepath.WalkDir(path, walkSourceFile(sourceFiles))
@@ -30,6 +27,13 @@ func ReadSchema(path string) (schema string, err error) {
 }
 
 func walkSourceFile(sourceFiles map[string]*SourceFile) fs.WalkDirFunc {
+
+	var validExtensions = map[string]struct{}{
+		".graphql":  {},
+		".gql":      {},
+		".graphqls": {},
+		".gqls":     {},
+	}
 	return func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -55,6 +59,15 @@ func walkSourceFile(sourceFiles map[string]*SourceFile) fs.WalkDirFunc {
 
 		return nil
 	}
+}
+
+func getDirectory() string {
+	_, file, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("failed to get directory")
+	}
+
+	return path.Dir(file)
 }
 
 // SourceFile represents a schema file

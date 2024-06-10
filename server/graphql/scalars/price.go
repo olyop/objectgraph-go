@@ -1,24 +1,23 @@
 package scalars
 
 import (
-	"database/sql"
 	"strconv"
 )
 
 type Price struct {
-	Value int64
+	Value int
 }
 
-func NewPrice(value int64) Price {
+func NewPrice(value int) Price {
 	return Price{Value: value}
 }
 
-func NewNillPrice(value sql.NullInt64) *Price {
-	if !value.Valid {
+func NewNilPrice(value *int) *Price {
+	if value == nil {
 		return nil
 	}
 
-	return &Price{Value: value.Int64}
+	return &Price{Value: *value}
 }
 
 func (Price) ImplementsGraphQLType(name string) bool {
@@ -29,7 +28,7 @@ func (p *Price) UnmarshalGraphQL(input interface{}) error {
 	switch input := input.(type) {
 	case string:
 		// convert from string representation of a int
-		value, err := strconv.ParseInt(input, 10, 64)
+		value, err := strconv.Atoi(input)
 		if err != nil {
 			return err
 		}
@@ -42,6 +41,17 @@ func (p *Price) UnmarshalGraphQL(input interface{}) error {
 	}
 }
 
+func (p *Price) UnmarshalJSON(data []byte) error {
+	value, err := strconv.Atoi(string(data))
+	if err != nil {
+		return err
+	}
+
+	p.Value = value
+
+	return nil
+}
+
 func (p Price) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(p.Value, 10)), nil
+	return []byte(strconv.Itoa(p.Value)), nil
 }
