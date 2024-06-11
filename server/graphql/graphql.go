@@ -1,20 +1,13 @@
 package graphql
 
 import (
-	"context"
-	"encoding/json"
-	"log"
-	"net/http"
-	"sync"
 	"time"
 
-	"github.com/graph-gophers/graphql-go"
 	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/retreivers"
-	"github.com/olyop/graphql-go/server/graphql/schema"
 )
 
-func CreateHandler() http.HandlerFunc {
+func Initialize() {
 	engine.RegisterRetrievers(engine.RetrieverMap{
 		"get-brand-by-id":          retreivers.GetBrandByID,
 		"get-products":             retreivers.GetProducts,
@@ -26,65 +19,4 @@ func CreateHandler() http.HandlerFunc {
 	engine.RegisterCacheDurations(map[string]time.Duration{
 		"catalog": 45 * time.Second,
 	})
-
-	schema := schema.Parse()
-
-	resolverMutexMap := new(sync.Map)
-
-	return func(writer http.ResponseWriter, request *http.Request) {
-		requestMutexMap := new(sync.Map)
-
-		request = request.WithContext(
-			context.WithValue(
-				context.WithValue(
-					request.Context(),
-					engine.ResolverRetrieveMutexContextKey{},
-					resolverMutexMap,
-				),
-				engine.ResolverRequestMutexContextKey{},
-				requestMutexMap,
-			),
-		)
-
-		var body graphQLBody
-		err := json.NewDecoder(request.Body).Decode(&body)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		response := schema.Exec(
-			request.Context(),
-			body.Query,
-			body.OperationName,
-			body.Variables,
-		)
-
-		for _, err := range response.Errors {
-			log.Default().Println("graphql: " + err.Message)
-		}
-
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		writer.Header().Set("Content-Type", determineContentType(response))
-		writer.Write(responseJSON)
-	}
-}
-
-func determineContentType(response *graphql.Response) string {
-	if len(response.Errors) > 0 {
-		return "application/problem+json"
-	}
-
-	return "application/json"
-}
-
-type graphQLBody struct {
-	Query         string                 `json:"query"`
-	OperationName string                 `json:"operationName"`
-	Variables     map[string]interface{} `json:"variables"`
 }

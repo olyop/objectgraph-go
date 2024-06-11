@@ -1,24 +1,27 @@
 package populate
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/olyop/graphql-go/data/import"
+	"github.com/olyop/graphql-go/data/files"
 )
 
-func Execute(data *importdata.Data) {
+func Execute(data *files.Data) {
+	clearUsers()
 	clearCategories()
 	clearClassifications()
 	clearProducts()
 	clearBrands()
 
+	users := populateUsers(data)
 	classifications := populateClassifications(data)
 	categories := populateCategories(data, classifications)
-	classificationsToBrands, brands := populateBrands(data)
-	products := populateProducts(data, classificationsToBrands, brands, categories)
+	brands, classificationsToBrands := populateBrands(data)
+	products := populateProducts(data, brands, categories, classificationsToBrands)
 
-	fmt.Println("Classifications:", len(classifications))
-	fmt.Println("Categories:", len(categories))
-	fmt.Println("Brands:", len(brands))
-	fmt.Println("Products:", len(products))
+	log.Default().Printf("Populated %d users\n", len(users))
+	log.Default().Printf("Populated %d classifications\n", len(classifications))
+	log.Default().Printf("Populated %d categories\n", len(categories))
+	log.Default().Printf("Populated %d brands\n", len(brands))
+	log.Default().Printf("Populated %d products\n", len(products))
 }

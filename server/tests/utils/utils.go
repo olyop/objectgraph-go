@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -31,11 +32,19 @@ func Iterate(f func(), options IterateOptions) {
 		}
 
 		if (i < options.Iterations-1) && options.Delay != 0 {
-			time.Sleep(time.Duration(options.Delay) * time.Millisecond)
+			Sleep(options.Delay)
 		}
 	}
 
 	wg.Wait()
+}
+
+func Sleep(ms int) {
+	time.Sleep(time.Duration(ms) * time.Millisecond)
+}
+
+func RandomInt(min, max int) int {
+	return min + rand.Intn(max-min)
 }
 
 type IterateOptions struct {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"net/http"
 	"os"
@@ -11,15 +12,21 @@ import (
 	"github.com/olyop/graphql-go/server/database"
 	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql"
+	"github.com/olyop/graphql-go/server/graphql/resolvers"
 
 	_ "github.com/lib/pq"
 )
+
+//go:embed graphql/schema
+var schemaFs embed.FS
 
 func main() {
 	loadEnv()
 
 	database.Connect()
 	defer database.Close()
+
+	graphql.Initialize()
 
 	engine.Initialize()
 	defer engine.Close()
@@ -37,7 +44,7 @@ func main() {
 	r.Use(middleware.Timeout(time.Second * 30))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(corsHandler())
-	r.Post("/graphql", graphql.CreateHandler())
+	r.Post("/graphql", engine.CreateHandler(schemaFs, &resolvers.Resolver{}))
 
 	if os.Getenv("GO_ENV") == "development" {
 		log.Fatal(http.ListenAndServeTLS(":8080", os.Getenv("TLS_CERT_PATH"), os.Getenv("TLS_KEY_PATH"), r))

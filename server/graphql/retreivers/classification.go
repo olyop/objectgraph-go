@@ -30,8 +30,6 @@ func mapToClassificationResolver(classification *database.Classification) *resol
 	}
 
 	return &resolvers.ClassificationResolver{
-		Classification: classification,
-
 		ClassificationID: scalars.NewUUID(classification.ClassificationID),
 		Name:             classification.Name,
 		UpdatedAt:        scalars.NewNilTimestamp(classification.UpdatedAt),

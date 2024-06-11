@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/import"
+	"github.com/olyop/graphql-go/data/files"
 )
 
-func populateCategories(data *importdata.Data, classifications map[string]string) map[string]string {
+func populateCategories(data *files.Data, classifications map[string]string) map[string]string {
 	sql, params := createCategoriesQuery(data, classifications)
 
 	rows, err := database.DB.Query(sql, params...)
@@ -25,7 +25,7 @@ func populateCategories(data *importdata.Data, classifications map[string]string
 	return categories
 }
 
-func createCategoriesQuery(data *importdata.Data, classifications map[string]string) (string, []interface{}) {
+func createCategoriesQuery(data *files.Data, classifications map[string]string) (string, []interface{}) {
 	var sql strings.Builder
 	paramsIndex := 0
 	params := initializeParams(data)
@@ -65,7 +65,7 @@ func createCategoriesQuery(data *importdata.Data, classifications map[string]str
 	return sql.String(), convertToInterfaceSlice(params)
 }
 
-func initializeParams(data *importdata.Data) []string {
+func initializeParams(data *files.Data) []string {
 	count := 0
 
 	count += len(data.ClassificationToCategories)
