@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/import"
+	"github.com/olyop/graphql-go/data/files"
 )
 
-func populateProducts(data *importdata.Data, classificationsToBrands map[string][]string, brands map[string]string, categories map[string]string) []Product {
+func populateProducts(data *files.Data, brands map[string]string, categories map[string]string, classificationsToBrands map[string][]string) []Product {
 	products := generateProducts(data, classificationsToBrands)
 
 	for _, batch := range batchProducts(products) {
@@ -20,7 +20,7 @@ func populateProducts(data *importdata.Data, classificationsToBrands map[string]
 	return products
 }
 
-func generateProducts(data *importdata.Data, classificationsToBrands map[string][]string) []Product {
+func generateProducts(data *files.Data, classificationsToBrands map[string][]string) []Product {
 	products := make([]Product, 0)
 
 	for classification, classificationBrands := range classificationsToBrands {
@@ -55,7 +55,8 @@ func determineProductTypes(classification string) []Product {
 	case "Spirits", "Premix":
 		return spiritAndPreMixProductTypes
 	default:
-		panic("Invalid classification")
+		log.Default().Fatalf("Unknown classification: %s", classification)
+		return nil
 	}
 }
 
@@ -94,7 +95,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 	productsRows, err := database.DB.Query(sql.String(), productsParams...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	defer productsRows.Close()
@@ -105,7 +106,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		err := productsRows.Scan(&productID)
 		if err != nil {
-			panic(err)
+			log.Default().Fatal(err)
 		}
 
 		products[i].productID = productID
@@ -192,27 +193,27 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 	_, err = database.DB.Exec(productsCategoriesSql.String(), productsCategoriesParams...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec(productsVolumesSql.String(), convertSetToArr(productsParamsMap)...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec(productsAbvsSql.String(), convertSetToArr(productsParamsMap)...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	pricesRows, err := database.DB.Query(pricesSql.String())
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	promotionsRows, err := database.DB.Query(promotionsSql.String())
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	defer pricesRows.Close()
@@ -224,7 +225,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		err := pricesRows.Scan(&priceID)
 		if err != nil {
-			panic(err)
+			log.Default().Fatal(err)
 		}
 
 		productPricesValues := fmt.Sprintf("('%s','%s')", products[j].productID, priceID)
@@ -246,7 +247,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		err := promotionsRows.Scan(&promotionID)
 		if err != nil {
-			panic(err)
+			log.Default().Fatal(err)
 		}
 
 		productPromotionsValues := fmt.Sprintf("('%s','%s')", products[k].productID, promotionID)
@@ -264,15 +265,13 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 	_, err = database.DB.Exec(productsPricesSql.String())
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec(productsPromotionsSql.String())
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
-
-	log.Printf("Populated %d products", len(products))
 }
 
 func randRange(min, max int) int {
@@ -280,34 +279,34 @@ func randRange(min, max int) int {
 }
 
 func clearProducts() {
-	_, err := database.DB.Exec("DELETE FROM products_prices")
+	_, err := database.DB.Exec("DELETE FROM products_promotions")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
-	_, err = database.DB.Exec("DELETE FROM products_promotions")
+	_, err = database.DB.Exec("DELETE FROM products_prices")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
-	_, err = database.DB.Exec("DELETE FROM prices")
+	_, err = database.DB.Exec("DELETE FROM products_categories")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec("DELETE FROM products_volumes")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec("DELETE FROM products_abvs")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 
 	_, err = database.DB.Exec("DELETE FROM products")
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 }
 

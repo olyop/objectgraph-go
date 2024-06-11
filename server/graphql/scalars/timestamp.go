@@ -45,7 +45,6 @@ func (t *Timestamp) UnmarshalGraphQL(input interface{}) error {
 func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	content := string(data)
 	str := content[1 : len(content)-1]
-	println(str)
 
 	intValue, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {

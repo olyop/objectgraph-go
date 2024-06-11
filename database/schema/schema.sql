@@ -3,6 +3,90 @@ REPLACE function get_now () returns BIGINT language sql stable AS $$
 		SELECT cast(extract(epoch FROM now()) AS BIGINT) * 1000;
 	$$;
 
+CREATE TABLE IF NOT EXISTS contact_types (
+	contact_type_id UUID DEFAULT gen_random_uuid (),
+	contact_type_name VARCHAR(255) NOT NULL,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT contact_types_pk PRIMARY KEY (contact_type_id),
+	CONSTRAINT contact_types_contact_type_name_uq UNIQUE (contact_type_name),
+	CONSTRAINT contact_types_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT contact_types_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS contacts (
+	contact_id UUID DEFAULT gen_random_uuid (),
+	contact_type_id UUID NOT NULL,
+	contact_value VARCHAR(255) NOT NULL,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT contacts_pk PRIMARY KEY (contact_id),
+	CONSTRAINT contacts_contact_type_id_fk FOREIGN key (contact_type_id) REFERENCES contact_types (contact_type_id),
+	CONSTRAINT contacts_contact_value_ck CHECK (contact_value <> ''),
+	CONSTRAINT contacts_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT contacts_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS persons (
+	person_id UUID DEFAULT gen_random_uuid (),
+	person_first_name VARCHAR(255) NOT NULL,
+	person_last_name VARCHAR(255) NOT NULL,
+	person_dob BIGINT,
+	person_photo TEXT,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT persons_pk PRIMARY KEY (person_id),
+	CONSTRAINT persons_person_first_name_ck CHECK (person_first_name <> ''),
+	CONSTRAINT persons_person_last_name_ck CHECK (person_last_name <> ''),
+	CONSTRAINT persons_person_dob_ck CHECK (person_dob > 0),
+	CONSTRAINT persons_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT persons_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS persons_contacts (
+	person_id UUID NOT NULL,
+	contact_id UUID NOT NULL,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT persons_contacts_pk PRIMARY KEY (person_id, contact_id),
+	CONSTRAINT persons_contacts_person_id_fk FOREIGN key (person_id) REFERENCES persons (person_id),
+	CONSTRAINT persons_contacts_contact_id_fk FOREIGN key (contact_id) REFERENCES contacts (contact_id),
+	CONSTRAINT persons_contacts_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT persons_contacts_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+	user_id UUID DEFAULT gen_random_uuid (),
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT users_pk PRIMARY KEY (user_id),
+	CONSTRAINT users_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT users_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS users_persons (
+	user_id UUID NOT NULL,
+	person_id UUID NOT NULL,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT users_persons_pk PRIMARY KEY (user_id, person_id),
+	CONSTRAINT users_persons_user_id_fk FOREIGN key (user_id) REFERENCES users (user_id),
+	CONSTRAINT users_persons_person_id_fk FOREIGN key (person_id) REFERENCES persons (person_id),
+	CONSTRAINT users_persons_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT users_persons_created_at_ck CHECK (created_at > 0)
+);
+
+CREATE TABLE IF NOT EXISTS brands (
+	brand_id UUID DEFAULT gen_random_uuid (),
+	brand_name VARCHAR(255) NOT NULL,
+	updated_at BIGINT,
+	created_at BIGINT NOT NULL DEFAULT get_now (),
+	CONSTRAINT brands_pk PRIMARY KEY (brand_id),
+	CONSTRAINT brands_brand_name_uq UNIQUE (brand_name),
+	CONSTRAINT brands_updated_at_ck CHECK (updated_at > 0),
+	CONSTRAINT brands_created_at_ck CHECK (created_at > 0)
+);
+
 CREATE TABLE IF NOT EXISTS classifications (
 	classification_id UUID DEFAULT gen_random_uuid (),
 	classification_name VARCHAR(255) NOT NULL,
@@ -24,17 +108,6 @@ CREATE TABLE IF NOT EXISTS categories (
 	CONSTRAINT categories_classification_id_fk FOREIGN key (classification_id) REFERENCES classifications (classification_id),
 	CONSTRAINT categories_updated_at_ck CHECK (updated_at > 0),
 	CONSTRAINT categories_created_at_ck CHECK (created_at > 0)
-);
-
-CREATE TABLE IF NOT EXISTS brands (
-	brand_id UUID DEFAULT gen_random_uuid (),
-	brand_name VARCHAR(255) NOT NULL,
-	updated_at BIGINT,
-	created_at BIGINT NOT NULL DEFAULT get_now (),
-	CONSTRAINT brands_pk PRIMARY KEY (brand_id),
-	CONSTRAINT brands_brand_name_uq UNIQUE (brand_name),
-	CONSTRAINT brands_updated_at_ck CHECK (updated_at > 0),
-	CONSTRAINT brands_created_at_ck CHECK (created_at > 0)
 );
 
 CREATE TABLE IF NOT EXISTS prices (

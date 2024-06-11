@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/import"
+	"github.com/olyop/graphql-go/data/files"
 )
 
-func populateBrands(data *importdata.Data) (map[string][]string, map[string]string) {
+func populateBrands(data *files.Data) (map[string]string, map[string][]string) {
 	classificationsToBrands := make(map[string][]string)
 
 	brandsSet := make(map[string]struct{})
@@ -46,16 +46,14 @@ func populateBrands(data *importdata.Data) (map[string][]string, map[string]stri
 
 	rows, err := database.DB.Query(sql.String(), convertSetToArr(brandsSet)...)
 	if err != nil {
-		panic(err)
+		log.Default().Panic(err)
 	}
 
 	defer rows.Close()
 
 	brands := brandsRowsMapper(rows)
 
-	log.Printf("Populated %d brands", len(brands))
-
-	return classificationsToBrands, brands
+	return brands, classificationsToBrands
 }
 
 func brandsRowsMapper(rows *sql.Rows) map[string]string {
@@ -67,7 +65,7 @@ func brandsRowsMapper(rows *sql.Rows) map[string]string {
 
 		err := rows.Scan(&brandID, &brandName)
 		if err != nil {
-			panic(err)
+			log.Default().Panic(err)
 		}
 
 		brands[brandName] = brandID
@@ -79,6 +77,6 @@ func brandsRowsMapper(rows *sql.Rows) map[string]string {
 func clearBrands() {
 	_, err := database.DB.Exec("DELETE FROM brands")
 	if err != nil {
-		panic(err)
+		log.Default().Panic(err)
 	}
 }
