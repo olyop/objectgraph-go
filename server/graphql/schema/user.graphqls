@@ -1,0 +1,10 @@
+type User {
+	userID: UUID!
+	userName: String!
+	firstName: String!
+	lastName: String!
+	dob: Timestamp!
+	contacts: [Contact!]!
+	updatedAt: Timestamp
+	createdAt: Timestamp!
+}

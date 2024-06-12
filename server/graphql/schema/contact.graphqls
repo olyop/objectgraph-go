@@ -1,0 +1,7 @@
+type Contact {
+	contactID: UUID!
+	value: String!
+	type: String!
+	updatedAt: Timestamp
+	createdAt: Timestamp!
+}

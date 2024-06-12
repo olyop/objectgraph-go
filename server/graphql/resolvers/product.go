@@ -26,7 +26,7 @@ type ProductResolver struct {
 func (r *ProductResolver) Categories(ctx context.Context) ([]*CategoryResolver, error) {
 	return engine.ResolverList[CategoryResolver](ctx, engine.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "get-product-categories",
+		RetrieverKey:  "retrieve-product-categories",
 		RetrieverArgs: engine.RetrieverArgs{"productID": r.Product.ProductID.String()},
 	})
 }
@@ -34,7 +34,7 @@ func (r *ProductResolver) Categories(ctx context.Context) ([]*CategoryResolver, 
 func (r *ProductResolver) Brand(ctx context.Context) (*BrandResolver, error) {
 	return engine.Resolver[BrandResolver](ctx, engine.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "get-brand-by-id",
+		RetrieverKey:  "retrieve-brand-by-id",
 		RetrieverArgs: engine.RetrieverArgs{"brandID": r.Product.BrandID.String()},
 	})
 }

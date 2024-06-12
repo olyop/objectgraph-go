@@ -26,8 +26,6 @@ DROP TABLE IF EXISTS users;
 
 DROP TABLE IF EXISTS persons_contacts;
 
-DROP TABLE IF EXISTS contacts_types;
-
 DROP TABLE IF EXISTS contacts;
 
 DROP TABLE IF EXISTS contact_types;

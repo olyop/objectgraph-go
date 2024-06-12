@@ -2,6 +2,9 @@ package files
 
 import "embed"
 
+//go:embed ContactTypes.txt
+var contactTypesFile string
+
 //go:embed Users.txt
 var usersFile string
 
@@ -15,12 +18,14 @@ var brandsFolder embed.FS
 var categoriesFolder embed.FS
 
 func Read() *Data {
+	contactTypes := processFile(contactTypesFile)
 	users := processFileTabSeperated(usersFile)
 	classifications := processFile(classificationFile)
-	classificationsToBrands := processFolderMap(brandsFolder, classifications)
-	classificationsToCategories := processFolderMap(categoriesFolder, classifications)
+	classificationsToBrands := processFolderMap(brandsFolder, "Brands", classifications)
+	classificationsToCategories := processFolderMap(categoriesFolder, "Categories", classifications)
 
 	data := &Data{
+		ContactTypes:               contactTypes,
 		Users:                      users,
 		Classifications:            classifications,
 		ClassificationToBrands:     classificationsToBrands,
@@ -31,6 +36,7 @@ func Read() *Data {
 }
 
 type Data struct {
+	ContactTypes               []string
 	Users                      [][]string
 	Classifications            []string
 	ClassificationToCategories map[string][]string // classification -> categories

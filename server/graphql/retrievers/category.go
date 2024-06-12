@@ -1,4 +1,4 @@
-package retreivers
+package retrievers
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/olyop/graphql-go/server/graphql/scalars"
 )
 
-func GetProductCategories(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func RetreiveProductCategories(ctx context.Context, args engine.RetrieverArgs) (any, error) {
 	productID, err := uuid.Parse(args["productID"])
 	if err != nil {
 		return nil, err

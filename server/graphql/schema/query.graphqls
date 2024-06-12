@@ -1,4 +1,5 @@
 type Query {
+	getUsers: [User!]!
 	getProducts: [Product!]!
 
 	getProductByID(productID: UUID!): Product

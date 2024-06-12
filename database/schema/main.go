@@ -1,11 +1,15 @@
 package main
 
 import (
-	"os"
+	_ "embed"
+	"log"
 
 	_ "github.com/lib/pq"
 	"github.com/olyop/graphql-go/schema/database"
 )
+
+//go:embed schema.sql
+var schema string
 
 func main() {
 	loadEnv()
@@ -13,15 +17,8 @@ func main() {
 	database.Connect()
 	defer database.Close()
 
-	schemaFile, err := os.ReadFile("schema.sql")
+	_, err := database.DB.Exec(schema)
 	if err != nil {
-		panic(err)
-	}
-
-	schema := string(schemaFile)
-
-	_, err = database.DB.Exec(schema)
-	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
 }

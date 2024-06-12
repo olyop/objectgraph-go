@@ -13,7 +13,7 @@ func loadEnv() {
 		panic(err)
 	}
 
-	root := path.Dir(wd)
+	root := path.Dir(path.Dir(wd))
 	dotEnvPath := path.Join(root, ".env")
 
 	err = godotenv.Load(dotEnvPath)

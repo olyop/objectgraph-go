@@ -1,4 +1,4 @@
-package retreivers
+package retrievers
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/olyop/graphql-go/server/graphql/scalars"
 )
 
-func GetProductByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func RetreiveProductByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
 	productID, err := uuid.Parse(args["productID"])
 	if err != nil {
 		return nil, err
@@ -24,8 +24,8 @@ func GetProductByID(ctx context.Context, args engine.RetrieverArgs) (any, error)
 	return mapToProductResolver(product), nil
 }
 
-func GetProducts(ctx context.Context, args engine.RetrieverArgs) (any, error) {
-	products, err := database.SelectProducts(ctx)
+func RetreiveTop1000Products(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+	products, err := database.SelectTop1000Products(ctx)
 	if err != nil {
 		return nil, err
 	}

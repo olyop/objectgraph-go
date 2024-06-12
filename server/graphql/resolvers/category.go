@@ -20,7 +20,7 @@ type CategoryResolver struct {
 func (r *CategoryResolver) Classification(ctx context.Context) (*ClassificationResolver, error) {
 	return engine.Resolver[ClassificationResolver](ctx, engine.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "get-classification-by-id",
+		RetrieverKey:  "retrieve-classification-by-id",
 		RetrieverArgs: engine.RetrieverArgs{"classificationID": r.Category.ClassificationID.String()},
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
@@ -35,12 +36,14 @@ func populateBrands(data *files.Data) (map[string]string, map[string][]string) {
 
 		var row string
 		if i < len(brandsSet) {
-			row = fmt.Sprintf("%s,", row)
+			row = fmt.Sprintf("%s, ", values)
 		} else {
 			row = values
 		}
 		sql.WriteString(row)
 	}
+
+	os.WriteFile("/home/op/Downloads/brands.sql", []byte(sql.String()), 0644)
 
 	sql.WriteString(" RETURNING brand_id, brand_name")
 
@@ -48,6 +51,7 @@ func populateBrands(data *files.Data) (map[string]string, map[string][]string) {
 	if err != nil {
 		log.Default().Panic(err)
 	}
+	log.Default().Println("Populated brands")
 
 	defer rows.Close()
 
@@ -72,11 +76,4 @@ func brandsRowsMapper(rows *sql.Rows) map[string]string {
 	}
 
 	return brands
-}
-
-func clearBrands() {
-	_, err := database.DB.Exec("DELETE FROM brands")
-	if err != nil {
-		log.Default().Panic(err)
-	}
 }

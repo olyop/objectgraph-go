@@ -4,16 +4,18 @@ import (
 	"time"
 
 	"github.com/olyop/graphql-go/server/engine"
-	"github.com/olyop/graphql-go/server/graphql/retreivers"
+	"github.com/olyop/graphql-go/server/graphql/retrievers"
 )
 
 func Initialize() {
 	engine.RegisterRetrievers(engine.RetrieverMap{
-		"get-brand-by-id":          retreivers.GetBrandByID,
-		"get-products":             retreivers.GetProducts,
-		"get-product-by-id":        retreivers.GetProductByID,
-		"get-product-categories":   retreivers.GetProductCategories,
-		"get-classification-by-id": retreivers.GetClassificationByID,
+		"retrieve-brand-by-id":          retrievers.RetreiveBrandByID,
+		"retrieve-classification-by-id": retrievers.RetreiveClassificationByID,
+		"retrieve-product-by-id":        retrievers.RetreiveProductByID,
+		"retrieve-product-categories":   retrievers.RetreiveProductCategories,
+		"retrieve-top-1000-products":    retrievers.RetreiveTop1000Products,
+		"retrieve-top-1000-users":       retrievers.RetreiveTop1000Users,
+		"retrieve-user-contacts":        retrievers.RetreiveUserContacts,
 	})
 
 	engine.RegisterCacheDurations(map[string]time.Duration{

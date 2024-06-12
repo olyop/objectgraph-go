@@ -1,6 +1,6 @@
 package populate
 
-var beerAndCiderProductTypes = []Product{
+var beerAndCiderProductTypes = []product{
 	{
 		name:   "Stubby",
 		volume: 375,
@@ -33,7 +33,7 @@ var beerAndCiderProductTypes = []Product{
 	},
 }
 
-var wineProductTypes = []Product{
+var wineProductTypes = []product{
 	{
 		name:   "Bottle",
 		volume: 750,
@@ -54,7 +54,7 @@ var wineProductTypes = []Product{
 	},
 }
 
-var spiritAndPreMixProductTypes = []Product{
+var spiritAndPreMixProductTypes = []product{
 	{
 		name:   "750mL",
 		volume: 700,

@@ -15,14 +15,13 @@ func populateClassifications(data *files.Data) map[string]string {
 
 	rows, err := database.DB.Query(sql, params...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated classifications")
 
 	defer rows.Close()
 
 	classifications := classificationsRowsMapper(rows)
-
-	log.Printf("Populated %d classifications", len(classifications))
 
 	return classifications
 }
@@ -38,7 +37,7 @@ func createClassificationsQuery(data *files.Data) (string, []interface{}) {
 
 		var row string
 		if i < len(data.Classifications)-1 {
-			row = fmt.Sprintf("%s,", values)
+			row = fmt.Sprintf("%s, ", values)
 		} else {
 			row = values
 		}
@@ -68,11 +67,4 @@ func classificationsRowsMapper(rows *sql.Rows) map[string]string {
 	}
 
 	return classifications
-}
-
-func clearClassifications() {
-	_, err := database.DB.Exec("DELETE FROM classifications")
-	if err != nil {
-		panic(err)
-	}
 }

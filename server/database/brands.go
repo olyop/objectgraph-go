@@ -6,20 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database/queries"
 )
 
-//go:embed queries/select-brand-by-id.sql
-var selectBrandByID string
-
-type Brand struct {
-	BrandID   uuid.UUID
-	Name      string
-	UpdatedAt time.Time
-	CreatedAt time.Time
-}
-
 func SelectBrandByID(ctx context.Context, brandID uuid.UUID) (*Brand, error) {
-	rows, err := db.QueryContext(ctx, selectBrandByID, brandID)
+	rows, err := db.QueryContext(ctx, queries.SelectBrandByID, brandID)
 	if err != nil {
 		return nil, err
 	}
@@ -31,4 +22,11 @@ func SelectBrandByID(ctx context.Context, brandID uuid.UUID) (*Brand, error) {
 	}
 
 	return nil, nil
+}
+
+type Brand struct {
+	BrandID   uuid.UUID
+	Name      string
+	UpdatedAt time.Time
+	CreatedAt time.Time
 }

@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS persons (
 	person_first_name VARCHAR(255) NOT NULL,
 	person_last_name VARCHAR(255) NOT NULL,
 	person_dob BIGINT,
-	person_photo TEXT,
 	updated_at BIGINT,
 	created_at BIGINT NOT NULL DEFAULT get_now (),
 	CONSTRAINT persons_pk PRIMARY KEY (person_id),
@@ -57,9 +56,12 @@ CREATE TABLE IF NOT EXISTS persons_contacts (
 
 CREATE TABLE IF NOT EXISTS users (
 	user_id UUID DEFAULT gen_random_uuid (),
+	user_name VARCHAR(255) NOT NULL,
 	updated_at BIGINT,
 	created_at BIGINT NOT NULL DEFAULT get_now (),
 	CONSTRAINT users_pk PRIMARY KEY (user_id),
+	CONSTRAINT users_user_name_uq UNIQUE (user_name),
+	CONSTRAINT users_user_name_ck CHECK (user_name <> ''),
 	CONSTRAINT users_updated_at_ck CHECK (updated_at > 0),
 	CONSTRAINT users_created_at_ck CHECK (created_at > 0)
 );

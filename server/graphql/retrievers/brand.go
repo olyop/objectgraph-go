@@ -1,4 +1,4 @@
-package retreivers
+package retrievers
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/olyop/graphql-go/server/graphql/scalars"
 )
 
-func GetBrandByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func RetreiveBrandByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
 	brandID, err := uuid.Parse(args["brandID"])
 	if err != nil {
 		return nil, err

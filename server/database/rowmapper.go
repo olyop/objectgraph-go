@@ -5,6 +5,66 @@ import (
 	"time"
 )
 
+func userRowMapper(scanner Scanner) *User {
+	var user User
+
+	var dob int64
+	var updatedAt sql.NullInt64
+	var createdAt int64
+
+	cols := []interface{}{
+		&user.UserID,
+		&user.UserName,
+		&user.FirstName,
+		&user.LastName,
+		&dob,
+		&updatedAt,
+		&createdAt,
+	}
+
+	err := scanner.Scan(cols...)
+	if err != nil {
+		return nil
+	}
+
+	if updatedAt.Valid {
+		user.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+	}
+
+	user.DOB = time.UnixMilli(dob)
+	user.CreatedAt = time.UnixMilli(createdAt)
+
+	return &user
+}
+
+func contactRowMapper(scanner Scanner) *Contact {
+	var contact Contact
+
+	var updatedAt sql.NullInt64
+	var createdAt int64
+
+	cols := []interface{}{
+		&contact.ContactID,
+		&contact.Value,
+		&contact.Type,
+		&updatedAt,
+		&createdAt,
+	}
+
+	err := scanner.Scan(cols...)
+	if err != nil {
+		return nil
+	}
+
+	if updatedAt.Valid {
+		contact.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+	}
+
+	contact.CreatedAt = time.UnixMilli(createdAt)
+
+	return &contact
+}
+
 func brandRowMapper(scanner Scanner) *Brand {
 	var brand Brand
 

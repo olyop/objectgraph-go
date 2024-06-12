@@ -22,7 +22,7 @@ func getCacheDuration(options ResolverOptions) time.Duration {
 func getRetriever(options ResolverOptions) Retriever {
 	retriever, retrieverFound := retrievers[options.RetrieverKey]
 	if !retrieverFound {
-		log.Fatal("retriever not found")
+		log.Fatalf("retriever not found: %s\n", options.RetrieverKey)
 	}
 
 	return retriever

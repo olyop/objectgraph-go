@@ -3,14 +3,13 @@ package populate
 import (
 	"fmt"
 	"log"
-	"math/rand/v2"
 	"strings"
 
 	"github.com/olyop/graphql-go/data/database"
 	"github.com/olyop/graphql-go/data/files"
 )
 
-func populateProducts(data *files.Data, brands map[string]string, categories map[string]string, classificationsToBrands map[string][]string) []Product {
+func populateProducts(data *files.Data, brands map[string]string, categories map[string]string, classificationsToBrands map[string][]string) []product {
 	products := generateProducts(data, classificationsToBrands)
 
 	for _, batch := range batchProducts(products) {
@@ -20,8 +19,8 @@ func populateProducts(data *files.Data, brands map[string]string, categories map
 	return products
 }
 
-func generateProducts(data *files.Data, classificationsToBrands map[string][]string) []Product {
-	products := make([]Product, 0)
+func generateProducts(data *files.Data, classificationsToBrands map[string][]string) []product {
+	products := make([]product, 0)
 
 	for classification, classificationBrands := range classificationsToBrands {
 		types := determineProductTypes(classification)
@@ -30,7 +29,7 @@ func generateProducts(data *files.Data, classificationsToBrands map[string][]str
 		for _, brand := range classificationBrands {
 			for _, category := range categories {
 				for _, productType := range types {
-					products = append(products, Product{
+					products = append(products, product{
 						name:     fmt.Sprintf("%s %s %s %s", brand, productType.name, category, classification),
 						brand:    brand,
 						category: category,
@@ -46,7 +45,7 @@ func generateProducts(data *files.Data, classificationsToBrands map[string][]str
 	return products
 }
 
-func determineProductTypes(classification string) []Product {
+func determineProductTypes(classification string) []product {
 	switch classification {
 	case "Beer", "Cider":
 		return beerAndCiderProductTypes
@@ -60,7 +59,7 @@ func determineProductTypes(classification string) []Product {
 	}
 }
 
-func populateProductsBatch(products []Product, brands map[string]string, categories map[string]string) {
+func populateProductsBatch(products []product, brands map[string]string, categories map[string]string) {
 	var sql strings.Builder
 	productsParams := make([]interface{}, 0)
 	brandsParamsMap := make(map[string]int)
@@ -82,7 +81,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		var row string
 		if i < len(products)-1 {
-			row = fmt.Sprintf("%s,", values)
+			row = fmt.Sprintf("%s, ", values)
 		} else {
 			row = values
 		}
@@ -97,6 +96,8 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+
+	log.Default().Println("Populated products")
 
 	defer productsRows.Close()
 
@@ -169,11 +170,11 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 		var abvRow string
 		var categoryRow string
 		if i < len(products)-1 {
-			priceRow = fmt.Sprintf("%s,", priceValues)
-			promotionRow = fmt.Sprintf("%s,", promotionValues)
-			volumeRow = fmt.Sprintf("%s,", volumeValues)
-			abvRow = fmt.Sprintf("%s,", abvValues)
-			categoryRow = fmt.Sprintf("%s,", categoryValues)
+			priceRow = fmt.Sprintf("%s, ", priceValues)
+			promotionRow = fmt.Sprintf("%s, ", promotionValues)
+			volumeRow = fmt.Sprintf("%s, ", volumeValues)
+			abvRow = fmt.Sprintf("%s, ", abvValues)
+			categoryRow = fmt.Sprintf("%s, ", categoryValues)
 		} else {
 			priceRow = priceValues
 			promotionRow = promotionValues
@@ -195,26 +196,31 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated products_categories")
 
 	_, err = database.DB.Exec(productsVolumesSql.String(), convertSetToArr(productsParamsMap)...)
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated products_volumes")
 
 	_, err = database.DB.Exec(productsAbvsSql.String(), convertSetToArr(productsParamsMap)...)
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated products_abvs")
 
 	pricesRows, err := database.DB.Query(pricesSql.String())
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated prices")
 
 	promotionsRows, err := database.DB.Query(promotionsSql.String())
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated promotions")
 
 	defer pricesRows.Close()
 	defer promotionsRows.Close()
@@ -232,7 +238,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		var productPricesRow string
 		if j < len(products)-1 {
-			productPricesRow = fmt.Sprintf("%s,", productPricesValues)
+			productPricesRow = fmt.Sprintf("%s, ", productPricesValues)
 		} else {
 			productPricesRow = productPricesValues
 		}
@@ -254,7 +260,7 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 
 		var productPromotionsRow string
 		if k < len(products)-1 {
-			productPromotionsRow = fmt.Sprintf("%s,", productPromotionsValues)
+			productPromotionsRow = fmt.Sprintf("%s, ", productPromotionsValues)
 		} else {
 			productPromotionsRow = productPromotionsValues
 		}
@@ -267,50 +273,16 @@ func populateProductsBatch(products []Product, brands map[string]string, categor
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated products_prices")
 
 	_, err = database.DB.Exec(productsPromotionsSql.String())
 	if err != nil {
 		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated products_promotions")
 }
 
-func randRange(min, max int) int {
-	return rand.IntN(max-min) + min
-}
-
-func clearProducts() {
-	_, err := database.DB.Exec("DELETE FROM products_promotions")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM products_prices")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM products_categories")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM products_volumes")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM products_abvs")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM products")
-	if err != nil {
-		log.Default().Fatal(err)
-	}
-}
-
-type Product struct {
+type product struct {
 	productID string
 	name      string
 	brand     string

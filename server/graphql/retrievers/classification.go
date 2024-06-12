@@ -1,4 +1,4 @@
-package retreivers
+package retrievers
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/olyop/graphql-go/server/graphql/scalars"
 )
 
-func GetClassificationByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func RetreiveClassificationByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
 	classificationID, err := uuid.Parse(args["classificationID"])
 	if err != nil {
 		return nil, err

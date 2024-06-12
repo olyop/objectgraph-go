@@ -15,12 +15,11 @@ func populateCategories(data *files.Data, classifications map[string]string) map
 
 	rows, err := database.DB.Query(sql, params...)
 	if err != nil {
-		panic(err)
+		log.Default().Fatal(err)
 	}
+	log.Default().Println("Populated categories")
 
 	categories := categoriesRowsMapper(rows)
-
-	log.Printf("Populated %d categories", len(categories))
 
 	return categories
 }
@@ -43,7 +42,7 @@ func createCategoriesQuery(data *files.Data, classifications map[string]string) 
 
 			var row string
 			if categoryIndex < len(categories)-1 {
-				row = fmt.Sprintf("%s,", values)
+				row = fmt.Sprintf("%s, ", values)
 			} else {
 				row = values
 			}
@@ -93,16 +92,4 @@ func categoriesRowsMapper(rows *sql.Rows) map[string]string {
 	}
 
 	return categories
-}
-
-func clearCategories() {
-	_, err := database.DB.Exec("DELETE FROM products_categories")
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = database.DB.Exec("DELETE FROM categories")
-	if err != nil {
-		panic(err)
-	}
 }

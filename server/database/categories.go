@@ -6,10 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database/queries"
 )
-
-//go:embed queries/select-categories-by-product-id.sql
-var selectCategoriesByProductID string
 
 type Category struct {
 	CategoryID       uuid.UUID
@@ -20,7 +18,7 @@ type Category struct {
 }
 
 func SelectCategoriesByProductID(ctx context.Context, productID uuid.UUID) ([]*Category, error) {
-	rows, err := db.QueryContext(ctx, selectCategoriesByProductID, productID)
+	rows, err := db.QueryContext(ctx, queries.SelectCategoriesByProductID, productID)
 	if err != nil {
 		return nil, err
 	}

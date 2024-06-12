@@ -6,10 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database/queries"
 )
-
-//go:embed queries/select-classification-by-id.sql
-var selectClassificationByID string
 
 type Classification struct {
 	ClassificationID uuid.UUID
@@ -19,7 +17,7 @@ type Classification struct {
 }
 
 func SelectClassificationByID(ctx context.Context, classificationID uuid.UUID) (*Classification, error) {
-	rows, err := db.QueryContext(ctx, selectClassificationByID, classificationID)
+	rows, err := db.QueryContext(ctx, queries.SelectClassificationByID, classificationID)
 	if err != nil {
 		return nil, err
 	}

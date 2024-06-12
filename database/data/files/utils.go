@@ -4,14 +4,17 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"path"
 	"strings"
 )
 
-func processFolderMap(fs fs.FS, base []string) map[string][]string {
+func processFolderMap(fs fs.FS, folderPath string, itemMap []string) map[string][]string {
 	folderMap := make(map[string][]string)
 
-	for _, item := range base {
-		file, err := fs.Open(item)
+	for _, item := range itemMap {
+		itemPath := path.Join(folderPath, item) + ".txt"
+
+		file, err := fs.Open(itemPath)
 		if err != nil {
 			log.Default().Fatal(err)
 		}

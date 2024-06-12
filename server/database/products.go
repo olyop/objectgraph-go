@@ -6,29 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/olyop/graphql-go/server/database/queries"
 )
 
-//go:embed queries/select-top-1000-products.sql
-var selectTop1000Products string
-
-//go:embed queries/select-product-by-id.sql
-var selectProductByID string
-
-type Product struct {
-	ProductID                 uuid.UUID
-	Name                      string
-	BrandID                   uuid.UUID
-	Price                     int
-	ABV                       *int
-	Volume                    *int
-	PromotionDiscount         *int
-	PromotionDiscountMultiple *int
-	UpdatedAt                 time.Time
-	CreatedAt                 time.Time
-}
-
-func SelectProducts(ctx context.Context) ([]*Product, error) {
-	rows, err := db.QueryContext(ctx, selectTop1000Products)
+func SelectTop1000Products(ctx context.Context) ([]*Product, error) {
+	rows, err := db.QueryContext(ctx, queries.SelectTop1000Products)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +27,7 @@ func SelectProducts(ctx context.Context) ([]*Product, error) {
 }
 
 func SelectProductByID(ctx context.Context, productID uuid.UUID) (*Product, error) {
-	rows, err := db.QueryContext(ctx, selectProductByID, productID)
+	rows, err := db.QueryContext(ctx, queries.SelectProductByID, productID)
 	if err != nil {
 		return nil, err
 	}
@@ -57,4 +39,17 @@ func SelectProductByID(ctx context.Context, productID uuid.UUID) (*Product, erro
 	}
 
 	return nil, nil
+}
+
+type Product struct {
+	ProductID                 uuid.UUID
+	Name                      string
+	BrandID                   uuid.UUID
+	Price                     int
+	ABV                       *int
+	Volume                    *int
+	PromotionDiscount         *int
+	PromotionDiscountMultiple *int
+	UpdatedAt                 time.Time
+	CreatedAt                 time.Time
 }

@@ -10,7 +10,7 @@ import (
 func (*Resolver) UpdateProductByID(ctx context.Context, args *UpdateProductByIDArgs) (*ProductResolver, error) {
 	return engine.Resolver[ProductResolver](ctx, engine.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "get-product-by-id",
+		RetrieverKey:  "retrieve-product-by-id",
 		RetrieverArgs: engine.RetrieverArgs{"productID": args.Input.ProductID.Value.String()},
 	})
 }

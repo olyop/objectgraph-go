@@ -1,5 +1,5 @@
 query {
-	getProductByID(productID: "0002dbd9-23b1-4f80-bf36-f27e64845a31") {
+	getProductByID(productID: "00009d41-6d7e-464a-9878-a19a12751cf4") {
 		productID
 		name
 		price
