@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
 type ProductResolver struct {
@@ -24,17 +24,17 @@ type ProductResolver struct {
 }
 
 func (r *ProductResolver) Categories(ctx context.Context) ([]*CategoryResolver, error) {
-	return engine.ResolverList[CategoryResolver](ctx, engine.ResolverOptions{
+	return graphqlops.ResolverList[CategoryResolver](ctx, graphqlops.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "retrieve-product-categories",
-		RetrieverArgs: engine.RetrieverArgs{"productID": r.Product.ProductID.String()},
+		RetrieverKey:  "RetrieveProductCategories",
+		RetrieverArgs: graphqlops.RetrieverArgs{"productID": r.Product.ProductID},
 	})
 }
 
 func (r *ProductResolver) Brand(ctx context.Context) (*BrandResolver, error) {
-	return engine.Resolver[BrandResolver](ctx, engine.ResolverOptions{
+	return graphqlops.Resolver[BrandResolver](ctx, graphqlops.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "retrieve-brand-by-id",
-		RetrieverArgs: engine.RetrieverArgs{"brandID": r.Product.BrandID.String()},
+		RetrieverKey:  "RetrieveBrandByID",
+		RetrieverArgs: graphqlops.RetrieverArgs{"brandID": r.Product.BrandID},
 	})
 }

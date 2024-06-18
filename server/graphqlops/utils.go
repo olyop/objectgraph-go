@@ -1,7 +1,10 @@
-package engine
+package graphqlops
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"reflect"
 	"sort"
 	"time"
 )
@@ -10,8 +13,8 @@ const (
 	emptyCacheKey = "none"
 )
 
-func getCacheDuration(options ResolverOptions) time.Duration {
-	cacheDuration, cacheDurationFound := cacheDurations[options.CacheDuration]
+func (e *Engine) getCacheDuration(options ResolverOptions) time.Duration {
+	cacheDuration, cacheDurationFound := e.configuration.Cache.Durations[options.CacheDuration]
 	if !cacheDurationFound {
 		log.Fatal("cache duration not found")
 	}
@@ -19,16 +22,19 @@ func getCacheDuration(options ResolverOptions) time.Duration {
 	return cacheDuration
 }
 
-func getRetriever(options ResolverOptions) Retriever {
-	retriever, retrieverFound := retrievers[options.RetrieverKey]
-	if !retrieverFound {
-		log.Fatalf("retriever not found: %s\n", options.RetrieverKey)
+func (e *Engine) getRetriever(options ResolverOptions) Retriever {
+	key := options.RetrieverKey
+
+	// get the retriever from e.Configuration.Retrievers using reflect
+	retriever := reflect.ValueOf(e.configuration.Retrievers).MethodByName(key)
+	if !retriever.IsValid() {
+		log.Fatalf("retriever not found: %s", key)
 	}
 
-	return retriever
+	return retriever.Interface().(func(ctx context.Context, args RetrieverArgs) (any, error))
 }
 
-func getCacheKey(options ResolverOptions) string {
+func (e *Engine) getCacheKey(options ResolverOptions) string {
 	var cacheKey string
 
 	for _, arg := range sortMapAlphabetically(options.RetrieverArgs) {
@@ -46,7 +52,7 @@ func sortMapAlphabetically(m RetrieverArgs) [][2]string {
 	sorted := make([][2]string, 0, len(m))
 
 	for key, value := range m {
-		sorted = append(sorted, [2]string{key, value})
+		sorted = append(sorted, [2]string{key, value.(fmt.Stringer).String()})
 	}
 
 	sort.Slice(sorted, func(i, j int) bool {

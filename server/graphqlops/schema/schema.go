@@ -7,6 +7,16 @@ import (
 	"github.com/graph-gophers/graphql-go"
 )
 
+type Schema struct {
+	*graphql.Schema
+}
+
+func New(schemaFs fs.FS, resolver interface{}) *Schema {
+	return &Schema{
+		Schema: Parse(schemaFs, resolver),
+	}
+}
+
 func Parse(schemaFs fs.FS, resolver interface{}) *graphql.Schema {
 	schemaString, err := readSchema(schemaFs)
 	if err != nil {
@@ -18,5 +28,10 @@ func Parse(schemaFs fs.FS, resolver interface{}) *graphql.Schema {
 		graphql.UseFieldResolvers(),
 	}
 
-	return graphql.MustParseSchema(schemaString, resolver, options...)
+	schema, err := graphql.ParseSchema(schemaString, resolver, options...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return schema
 }

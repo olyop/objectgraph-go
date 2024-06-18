@@ -5,16 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/resolvers"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
-func RetreiveClassificationByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
-	classificationID, err := uuid.Parse(args["classificationID"])
-	if err != nil {
-		return nil, err
-	}
+func (*Retrievers) RetrieveClassificationByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
+	classificationID := args["classificationID"].(uuid.UUID)
 
 	classification, err := database.SelectClassificationByID(ctx, classificationID)
 	if err != nil {
@@ -25,10 +22,6 @@ func RetreiveClassificationByID(ctx context.Context, args engine.RetrieverArgs) 
 }
 
 func mapToClassificationResolver(classification *database.Classification) *resolvers.ClassificationResolver {
-	if classification == nil {
-		return nil
-	}
-
 	return &resolvers.ClassificationResolver{
 		ClassificationID: scalars.NewUUID(classification.ClassificationID),
 		Name:             classification.Name,

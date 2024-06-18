@@ -1,14 +1,16 @@
-package engine
+package graphqlops
 
 import (
 	"context"
 
-	"github.com/olyop/graphql-go/server/engine/distributedcache"
-	"github.com/olyop/graphql-go/server/engine/inmemorycache"
+	"github.com/olyop/graphql-go/server/graphqlops/distributedcache"
+	"github.com/olyop/graphql-go/server/graphqlops/inmemorycache"
 )
 
 func Resolver[R any](ctx context.Context, options ResolverOptions) (*R, error) {
-	result, err := resolve[*R](ctx, options)
+	e := ctx.Value(EngineContextKey{}).(*Engine)
+
+	result, err := e.resolve(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -17,11 +19,13 @@ func Resolver[R any](ctx context.Context, options ResolverOptions) (*R, error) {
 		return nil, nil
 	}
 
-	return result, nil
+	return result.(*R), nil
 }
 
 func ResolverList[R any](ctx context.Context, options ResolverOptions) ([]*R, error) {
-	result, err := resolve[*[]*R](ctx, options)
+	e := ctx.Value(EngineContextKey{}).(*Engine)
+
+	result, err := e.resolve(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -30,34 +34,33 @@ func ResolverList[R any](ctx context.Context, options ResolverOptions) ([]*R, er
 		return nil, nil
 	}
 
-	return *result, nil
+	return result.([]*R), nil
 }
 
-func resolve[R any](ctx context.Context, options ResolverOptions) (R, error) {
-	cacheKey := getCacheKey(options)
+func (e *Engine) resolve(ctx context.Context, options ResolverOptions) (any, error) {
+	cacheKey := e.getCacheKey(options)
+	cacheDuration := e.getCacheDuration(options)
+	retriever := e.getRetriever(options)
 
 	// first check the in-memory cache
-	result, found := inmemorycache.Get[R](options.RetrieverKey, cacheKey)
+	result, found := inmemorycache.Get(options.RetrieverKey, cacheKey)
 	if found {
 		return result, nil
 	}
 
 	// this lock is to ensure that only one resolver is fetching the value from the source
-	requestMutex := getRequestMutext(ctx, cacheKey)
-	requestMutex.Lock()
-	defer requestMutex.Unlock()
+	requestResolverLocker := loadResolverLocker(ctx, ResolverRequestLockerContextKey{}, cacheKey)
+	requestResolverLocker.Lock()
+	defer requestResolverLocker.Unlock()
 
 	// check again in case another resolver has already fetched the value
-	result, found = inmemorycache.Get[R](options.RetrieverKey, cacheKey)
+	result, found = inmemorycache.Get(options.RetrieverKey, cacheKey)
 	if found {
 		return result, nil
 	}
 
-	cacheDuration := getCacheDuration(options)
-	retriever := getRetriever(options)
-
 	// check the distributed cache
-	result, found, err := distributedcache.Get[R](ctx, cacheKey)
+	result, found, err := distributedcache.Get(ctx, cacheKey)
 	if err != nil {
 		return result, err
 	}
@@ -70,23 +73,21 @@ func resolve[R any](ctx context.Context, options ResolverOptions) (R, error) {
 	}
 
 	// this lock is to prevent multiple requests from retrieving the same value from the source
-	resolverMutex := getResolverMutex(ctx, cacheKey)
-	resolverMutex.Lock()
-	defer resolverMutex.Unlock()
+	resolverLocker := loadResolverLocker(ctx, ResolverLockerContextKey{}, cacheKey)
+	resolverLocker.Lock()
+	defer resolverLocker.Unlock()
 
 	// check again in case another request has already fetched and cached the result
-	result, found = inmemorycache.Get[R](options.RetrieverKey, cacheKey)
+	result, found = inmemorycache.Get(options.RetrieverKey, cacheKey)
 	if found {
 		return result, nil
 	}
 
 	// not found in any of the caches, so retrieve the result
-	data, err := retriever(ctx, options.RetrieverArgs)
+	result, err = retriever(ctx, options.RetrieverArgs)
 	if err != nil {
 		return result, err
 	}
-
-	result = data.(R)
 
 	// cache the result in the in-memory and distributed caches
 	inmemorycache.Set(options.RetrieverKey, cacheKey, result, cacheDuration)

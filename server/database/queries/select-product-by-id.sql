@@ -1,7 +1,7 @@
 SELECT
 	products.product_id,
 	products.product_name,
-	brands.brand_id,
+	products.brand_id,
 	prices.price_value,
 	promotions.promotion_discount,
 	promotions.promotion_discount_multiple,
@@ -17,6 +17,5 @@ FROM
 	LEFT JOIN products_volumes ON products.product_id = products_volumes.product_id
 	LEFT JOIN prices ON products_prices.price_id = prices.price_id
 	LEFT JOIN promotions ON products_promotions.promotion_id = promotions.promotion_id
-	JOIN brands ON products.brand_id = brands.brand_id
 WHERE
 	products.product_id = $1;

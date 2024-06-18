@@ -5,16 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/resolvers"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
-func RetreiveProductCategories(ctx context.Context, args engine.RetrieverArgs) (any, error) {
-	productID, err := uuid.Parse(args["productID"])
-	if err != nil {
-		return nil, err
-	}
+func (*Retrievers) RetrieveProductCategories(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
+	productID := args["productID"].(uuid.UUID)
 
 	categories, err := database.SelectCategoriesByProductID(ctx, productID)
 	if err != nil {
@@ -26,14 +23,10 @@ func RetreiveProductCategories(ctx context.Context, args engine.RetrieverArgs) (
 		r[i] = mapToCategoryResolver(categories[i])
 	}
 
-	return &r, nil
+	return r, nil
 }
 
 func mapToCategoryResolver(category *database.Category) *resolvers.CategoryResolver {
-	if category == nil {
-		return nil
-	}
-
 	return &resolvers.CategoryResolver{
 		Category: category,
 

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
 type CategoryResolver struct {
@@ -18,9 +18,9 @@ type CategoryResolver struct {
 }
 
 func (r *CategoryResolver) Classification(ctx context.Context) (*ClassificationResolver, error) {
-	return engine.Resolver[ClassificationResolver](ctx, engine.ResolverOptions{
+	return graphqlops.Resolver[ClassificationResolver](ctx, graphqlops.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "retrieve-classification-by-id",
-		RetrieverArgs: engine.RetrieverArgs{"classificationID": r.Category.ClassificationID.String()},
+		RetrieverKey:  "RetrieveClassificationByID",
+		RetrieverArgs: graphqlops.RetrieverArgs{"classificationID": r.Category.ClassificationID},
 	})
 }

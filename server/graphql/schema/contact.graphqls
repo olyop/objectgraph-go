@@ -1,7 +1,12 @@
 type Contact {
 	contactID: UUID!
 	value: String!
-	type: String!
+	contactType: ContactType!
 	updatedAt: Timestamp
 	createdAt: Timestamp!
+}
+
+enum ContactType {
+	EmailAddress
+	MobileNumber
 }

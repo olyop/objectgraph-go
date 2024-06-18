@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/resolvers"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
-func RetreiveTop1000Users(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func (*Retrievers) RetrieveTop1000Users(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
 	users, err := database.SelectTop1000Users(ctx)
 	if err != nil {
 		return nil, err
@@ -20,14 +20,10 @@ func RetreiveTop1000Users(ctx context.Context, args engine.RetrieverArgs) (any, 
 		r[i] = mapToUserResolver(user)
 	}
 
-	return &r, nil
+	return r, nil
 }
 
 func mapToUserResolver(user *database.User) *resolvers.UserResolver {
-	if user == nil {
-		return nil
-	}
-
 	return &resolvers.UserResolver{
 		User: user,
 

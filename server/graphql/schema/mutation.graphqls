@@ -1,3 +1,4 @@
 type Mutation {
+	clearCache: Boolean!
 	updateProductByID(input: UpdateProductInput!): Product
 }

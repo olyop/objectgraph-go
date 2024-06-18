@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	_ "embed"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,12 +18,52 @@ func SelectTop1000Users(ctx context.Context) ([]*User, error) {
 	defer rows.Close()
 
 	users := make([]*User, 0)
+	scanner := userRowScanner(rows)
 
 	for rows.Next() {
-		users = append(users, userRowMapper(rows))
+		user, err := scanner()
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
 	}
 
 	return users, nil
+}
+
+func userRowScanner(scanner Scanner) func() (*User, error) {
+	return func() (*User, error) {
+		var user User
+
+		var dob int64
+		var updatedAt sql.NullInt64
+		var createdAt int64
+
+		cols := []interface{}{
+			&user.UserID,
+			&user.UserName,
+			&user.FirstName,
+			&user.LastName,
+			&dob,
+			&updatedAt,
+			&createdAt,
+		}
+
+		err := scanner.Scan(cols...)
+		if err != nil {
+			return nil, err
+		}
+
+		if updatedAt.Valid {
+			user.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+		}
+
+		user.DOB = time.UnixMilli(dob)
+		user.CreatedAt = time.UnixMilli(createdAt)
+
+		return &user, nil
+	}
 }
 
 type User struct {

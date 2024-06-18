@@ -3,15 +3,15 @@ package resolvers
 import (
 	"context"
 
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
 func (*Resolver) UpdateProductByID(ctx context.Context, args *UpdateProductByIDArgs) (*ProductResolver, error) {
-	return engine.Resolver[ProductResolver](ctx, engine.ResolverOptions{
+	return graphqlops.Resolver[ProductResolver](ctx, graphqlops.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "retrieve-product-by-id",
-		RetrieverArgs: engine.RetrieverArgs{"productID": args.Input.ProductID.Value.String()},
+		RetrieverKey:  "RetrieveProductByID",
+		RetrieverArgs: graphqlops.RetrieverArgs{"productID": args.Input.ProductID.Value},
 	})
 }
 
@@ -22,4 +22,13 @@ type UpdateProductByIDArgs struct {
 type UpdateProductByIDInput struct {
 	ProductID scalars.UUID
 	Name      string
+}
+
+func (*Resolver) ClearCache() (bool, error) {
+	err := graphqlops.ClearCache()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
 type UserResolver struct {
@@ -21,9 +21,9 @@ type UserResolver struct {
 }
 
 func (r *UserResolver) Contacts(ctx context.Context) ([]*ContactResolver, error) {
-	return engine.ResolverList[ContactResolver](ctx, engine.ResolverOptions{
+	return graphqlops.ResolverList[ContactResolver](ctx, graphqlops.ResolverOptions{
 		CacheDuration: "catalog",
-		RetrieverKey:  "retrieve-user-contacts",
-		RetrieverArgs: engine.RetrieverArgs{"userID": r.User.UserID.String()},
+		RetrieverKey:  "RetrieveUserContacts",
+		RetrieverArgs: graphqlops.RetrieverArgs{"userID": r.User.UserID},
 	})
 }

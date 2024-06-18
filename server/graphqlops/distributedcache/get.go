@@ -7,17 +7,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func Get[R any](ctx context.Context, cacheKey string) (R, bool, error) {
+func Get(ctx context.Context, cacheKey string) (any, bool, error) {
 	key := fmtKey(cacheKey)
-
-	var value R
 
 	result, err := client.Get(ctx, key).Bytes()
 	if err == redis.Nil {
-		return value, false, nil
+		return nil, false, nil
 	} else if err != nil {
-		return value, false, err
+		return nil, false, err
 	}
+
+	var value any
 
 	err = json.Unmarshal(result, &value)
 	if err != nil {

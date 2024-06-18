@@ -5,16 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/engine"
 	"github.com/olyop/graphql-go/server/graphql/resolvers"
 	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphql-go/server/graphqlops"
 )
 
-func RetreiveProductByID(ctx context.Context, args engine.RetrieverArgs) (any, error) {
-	productID, err := uuid.Parse(args["productID"])
-	if err != nil {
-		return nil, err
-	}
+func (*Retrievers) RetrieveProductByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
+	productID := args["productID"].(uuid.UUID)
 
 	product, err := database.SelectProductByID(ctx, productID)
 	if err != nil {
@@ -24,7 +21,7 @@ func RetreiveProductByID(ctx context.Context, args engine.RetrieverArgs) (any, e
 	return mapToProductResolver(product), nil
 }
 
-func RetreiveTop1000Products(ctx context.Context, args engine.RetrieverArgs) (any, error) {
+func (*Retrievers) RetrieveTop1000Products(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
 	products, err := database.SelectTop1000Products(ctx)
 	if err != nil {
 		return nil, err
@@ -35,14 +32,10 @@ func RetreiveTop1000Products(ctx context.Context, args engine.RetrieverArgs) (an
 		r[i] = mapToProductResolver(product)
 	}
 
-	return &r, nil
+	return r, nil
 }
 
 func mapToProductResolver(product *database.Product) *resolvers.ProductResolver {
-	if product == nil {
-		return nil
-	}
-
 	return &resolvers.ProductResolver{
 		Product: product,
 
