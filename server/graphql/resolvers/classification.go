@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"github.com/olyop/graphql-go/server/graphql/scalars"
+	"github.com/olyop/graphqlops-go/graphql/scalars"
 )
 
 type ClassificationResolver struct {

@@ -1,4 +1,4 @@
-package graphqlops
+package parser
 
 import (
 	"fmt"
@@ -6,18 +6,19 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 
-	"github.com/graph-gophers/graphql-go"
+	"github.com/olyop/graphqlops-go/graphqlops/graphql"
 )
 
-func parseSchema(schemaFs fs.FS, resolver interface{}) (*graphql.Schema, error) {
+func Exec(schemaFs fs.FS, resolver interface{}) (*graphql.Schema, error) {
 	schemaString, err := readSchema(schemaFs)
 	if err != nil {
 		return nil, err
 	}
 
 	options := []graphql.SchemaOpt{
-		graphql.MaxParallelism(500),
+		graphql.MaxParallelism(runtime.GOMAXPROCS(0)),
 		graphql.UseFieldResolvers(),
 	}
 

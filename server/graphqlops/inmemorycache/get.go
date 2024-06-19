@@ -1,6 +1,6 @@
 package inmemorycache
 
-func Get(groupKey string, cacheKey string) (any, bool) {
+func Get[T any](groupKey string, cacheKey string) (*T, bool) {
 	groupCache := handleGroup(groupKey)
 
 	item, exists := groupCache.Get(cacheKey)
@@ -8,5 +8,7 @@ func Get(groupKey string, cacheKey string) (any, bool) {
 		return nil, false
 	}
 
-	return item, true
+	value := item.(*T)
+
+	return value, true
 }

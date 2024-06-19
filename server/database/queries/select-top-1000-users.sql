@@ -15,4 +15,4 @@ ORDER BY
 	persons.person_last_name,
 	users.user_name
 LIMIT
-	1000;
+	100;

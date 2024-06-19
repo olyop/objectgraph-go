@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Set(ctx context.Context, cacheKey string, value any, ttl time.Duration) error {
+func Set[T any](ctx context.Context, cacheKey string, value T, ttl time.Duration) error {
 	key := fmtKey(cacheKey)
 
 	json, err := json.Marshal(value)

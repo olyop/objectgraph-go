@@ -7,10 +7,10 @@ import (
 )
 
 var client *redis.Client
-var prefix string
+var keyPrefix string
 
-func Connect(pre string, options *redis.Options) error {
-	prefix = pre
+func Connect(prefix string, options *redis.Options) error {
+	keyPrefix = prefix
 
 	client = redis.NewClient(options)
 

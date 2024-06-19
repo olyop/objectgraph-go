@@ -5,7 +5,7 @@
 	"description": "graphql-go",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/olyop/graphql-go/server.git"
+		"url": "git+https://github.com/olyop/graphqlops-go.git"
 	},
 	"keywords": [],
 	"author": "",

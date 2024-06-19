@@ -6,40 +6,29 @@ import (
 	"sync"
 	"time"
 
-	"github.com/graph-gophers/graphql-go"
+	"github.com/olyop/graphqlops-go/graphqlops/graphql"
 	"github.com/redis/go-redis/v9"
 )
 
+type EngineContextKey struct{}
+type ResolverLockerContextKey struct{}
+type ResolverRequestLockerContextKey struct{}
+
 type Engine struct {
-	schema         *graphql.Schema
 	configuration  *Configuration
+	schema         *graphql.Schema
 	resolverLocker *sync.Map
 }
 
 type Configuration struct {
-	Schema     fs.FS
-	Resolvers  any
-	Retrievers any
-	Cache      *CacheConfiguration
-}
-
-type CacheConfiguration struct {
-	Durations CacheDurationMap
-	Prefix    string
-	Redis     *redis.Options
+	Schema         fs.FS
+	Resolvers      any
+	Retrievers     any
+	CacheDurations CacheDurationMap
+	CachePrefix    string
+	CacheRedis     *redis.Options
 }
 
 type CacheDurationMap map[string]time.Duration
-
-type DistributedCacheOptions struct {
-	URL      string
-	Password string
-	Prefix   string
-}
-
-type EngineContextKey struct{}
-type ResolverRequestLockerContextKey struct{}
-type ResolverLockerContextKey struct{}
-
 type Retriever func(ctx context.Context, args RetrieverArgs) (any, error)
 type RetrieverArgs map[string]any

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database/queries"
+	"github.com/olyop/graphqlops-go/database/queries"
 )
 
 func SelectTop1000Users(ctx context.Context) ([]*User, error) {

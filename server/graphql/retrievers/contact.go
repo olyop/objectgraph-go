@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/graphql/enums"
-	"github.com/olyop/graphql-go/server/graphql/resolvers"
-	"github.com/olyop/graphql-go/server/graphql/scalars"
-	"github.com/olyop/graphql-go/server/graphqlops"
+	"github.com/olyop/graphqlops-go/database"
+	"github.com/olyop/graphqlops-go/graphql/enums"
+	"github.com/olyop/graphqlops-go/graphql/resolvers"
+	"github.com/olyop/graphqlops-go/graphql/scalars"
+	"github.com/olyop/graphqlops-go/graphqlops"
 )
 
 func (*Retrievers) RetrieveUserContacts(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
@@ -24,7 +24,7 @@ func (*Retrievers) RetrieveUserContacts(ctx context.Context, args graphqlops.Ret
 		r[i] = mapToContactResolver(contacts[i])
 	}
 
-	return r, nil
+	return &r, nil
 }
 
 func mapToContactResolver(contact *database.Contact) *resolvers.ContactResolver {

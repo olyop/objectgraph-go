@@ -7,7 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func Get(ctx context.Context, cacheKey string) (any, bool, error) {
+func Get[T any](ctx context.Context, cacheKey string) (*T, bool, error) {
 	key := fmtKey(cacheKey)
 
 	result, err := client.Get(ctx, key).Bytes()
@@ -17,12 +17,11 @@ func Get(ctx context.Context, cacheKey string) (any, bool, error) {
 		return nil, false, err
 	}
 
-	var value any
-
+	var value T
 	err = json.Unmarshal(result, &value)
 	if err != nil {
-		return value, false, err
+		return nil, false, err
 	}
 
-	return value, true, nil
+	return &value, true, nil
 }

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database/queries"
+	"github.com/olyop/graphqlops-go/database/queries"
 )
 
 func SelectContactsByUserID(ctx context.Context, userID uuid.UUID) ([]*Contact, error) {

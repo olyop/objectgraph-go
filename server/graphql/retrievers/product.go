@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/graphql/resolvers"
-	"github.com/olyop/graphql-go/server/graphql/scalars"
-	"github.com/olyop/graphql-go/server/graphqlops"
+	"github.com/olyop/graphqlops-go/database"
+	"github.com/olyop/graphqlops-go/graphql/resolvers"
+	"github.com/olyop/graphqlops-go/graphql/scalars"
+	"github.com/olyop/graphqlops-go/graphqlops"
 )
 
 func (*Retrievers) RetrieveProductByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
@@ -32,7 +32,7 @@ func (*Retrievers) RetrieveTop1000Products(ctx context.Context, args graphqlops.
 		r[i] = mapToProductResolver(product)
 	}
 
-	return r, nil
+	return &r, nil
 }
 
 func mapToProductResolver(product *database.Product) *resolvers.ProductResolver {

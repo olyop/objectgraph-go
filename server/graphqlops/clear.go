@@ -1,8 +1,8 @@
 package graphqlops
 
 import (
-	"github.com/olyop/graphql-go/server/graphqlops/distributedcache"
-	"github.com/olyop/graphql-go/server/graphqlops/inmemorycache"
+	"github.com/olyop/graphqlops-go/graphqlops/distributedcache"
+	"github.com/olyop/graphqlops-go/graphqlops/inmemorycache"
 )
 
 func ClearCache() error {

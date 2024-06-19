@@ -1,6 +1,6 @@
 type Brand {
-	brandID: UUID!
-	name: String!
-	updatedAt: Timestamp
-	createdAt: Timestamp!
+	brandID: UUID! @map(retriever: "BrandByID", key: "BrandID")
+	name: String! @map(retriever: "BrandByID", key: "Name")
+	updatedAt: Timestamp @map(retriever: "BrandByID", key: "UpdatedAt")
+	createdAt: Timestamp! @map(retriever: "BrandByID", key: "CreatedAt")
 }

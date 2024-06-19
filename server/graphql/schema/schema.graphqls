@@ -6,3 +6,5 @@ schema {
 scalar UUID
 scalar Timestamp
 scalar Price
+
+directive @map(retriever: String, key: String) on FIELD_DEFINITION

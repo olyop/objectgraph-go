@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/graph-gophers/graphql-go"
+	"github.com/olyop/graphqlops-go/graphqlops/graphql"
 )
 
 type Handler struct {
-	Engine *Engine
+	*Engine
 }
 
 func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {

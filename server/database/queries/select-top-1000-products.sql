@@ -20,4 +20,4 @@ FROM
 ORDER BY
 	products.product_id
 LIMIT
-	1000;
+	100;

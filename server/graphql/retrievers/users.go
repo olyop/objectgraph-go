@@ -3,10 +3,10 @@ package retrievers
 import (
 	"context"
 
-	"github.com/olyop/graphql-go/server/database"
-	"github.com/olyop/graphql-go/server/graphql/resolvers"
-	"github.com/olyop/graphql-go/server/graphql/scalars"
-	"github.com/olyop/graphql-go/server/graphqlops"
+	"github.com/olyop/graphqlops-go/database"
+	"github.com/olyop/graphqlops-go/graphql/resolvers"
+	"github.com/olyop/graphqlops-go/graphql/scalars"
+	"github.com/olyop/graphqlops-go/graphqlops"
 )
 
 func (*Retrievers) RetrieveTop1000Users(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
@@ -20,7 +20,7 @@ func (*Retrievers) RetrieveTop1000Users(ctx context.Context, args graphqlops.Ret
 		r[i] = mapToUserResolver(user)
 	}
 
-	return r, nil
+	return &r, nil
 }
 
 func mapToUserResolver(user *database.User) *resolvers.UserResolver {

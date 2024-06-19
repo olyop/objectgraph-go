@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphql-go/server/database/queries"
+	"github.com/olyop/graphqlops-go/database/queries"
 )
 
 func SelectClassificationByID(ctx context.Context, classificationID uuid.UUID) (*Classification, error) {

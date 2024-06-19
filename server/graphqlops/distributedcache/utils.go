@@ -1,5 +1,5 @@
 package distributedcache
 
 func fmtKey(cacheKey string) string {
-	return prefix + ":" + "distributedcache" + ":" + cacheKey
+	return keyPrefix + ":" + "cache" + ":" + cacheKey
 }
