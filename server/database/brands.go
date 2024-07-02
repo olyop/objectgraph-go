@@ -1,18 +1,16 @@
 package database
 
 import (
-	"context"
 	"database/sql"
-	_ "embed"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database/queries"
+	"github.com/lib/pq"
+	"github.com/olyop/objectgraph/database/queries"
 )
 
-func SelectBrandByID(ctx context.Context, brandID uuid.UUID) (*Brand, error) {
-	rows, err := db.QueryContext(ctx, queries.SelectBrandByID, brandID)
+func SelectBrandByID(brandID uuid.UUID) (*Brand, error) {
+	rows, err := db.Query(queries.SelectBrandByID, brandID)
 	if err != nil {
 		return nil, err
 	}
@@ -24,13 +22,34 @@ func SelectBrandByID(ctx context.Context, brandID uuid.UUID) (*Brand, error) {
 		return scanner()
 	}
 
-	return nil, fmt.Errorf("brand with id %s not found", brandID)
+	return nil, nil
+}
+
+func SelectBrandsByIDs(brandIDs []uuid.UUID) ([]*Brand, error) {
+	rows, err := db.Query(queries.SelectBrandsByIDs, pq.Array(brandIDs))
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	brands := make([]*Brand, len(brandIDs))
+	scanner := brandRowMapper(rows)
+	for rows.Next() {
+		brand, err := scanner()
+		if err != nil {
+			return nil, err
+		}
+
+		brands = append(brands, brand)
+	}
+
+	return brands, nil
 }
 
 func brandRowMapper(scanner Scanner) func() (*Brand, error) {
 	return func() (*Brand, error) {
 		var brand Brand
-
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
@@ -40,25 +59,17 @@ func brandRowMapper(scanner Scanner) func() (*Brand, error) {
 			&updatedAt,
 			&createdAt,
 		}
-
 		err := scanner.Scan(cols...)
 		if err != nil {
 			return nil, err
 		}
 
 		if updatedAt.Valid {
-			brand.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+			value := time.UnixMilli(updatedAt.Int64)
+			brand.UpdatedAt = &value
 		}
-
 		brand.CreatedAt = time.UnixMilli(createdAt)
 
 		return &brand, nil
 	}
-}
-
-type Brand struct {
-	BrandID   uuid.UUID
-	Name      string
-	UpdatedAt time.Time
-	CreatedAt time.Time
 }

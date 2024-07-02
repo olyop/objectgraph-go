@@ -1,31 +1,31 @@
 package retrievers
 
 import (
-	"context"
-
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database"
-	"github.com/olyop/graphqlops-go/graphql/resolvers"
-	"github.com/olyop/graphqlops-go/graphql/scalars"
-	"github.com/olyop/graphqlops-go/graphqlops"
+	"github.com/olyop/objectgraph/database"
+	"github.com/olyop/objectgraph/objectgraph"
 )
 
-func (*Retrievers) RetrieveBrandByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
-	brandID := args["brandID"].(uuid.UUID)
+type RetrieveBrand struct{}
 
-	brand, err := database.SelectBrandByID(ctx, brandID)
+func (*RetrieveBrand) ByID(args objectgraph.RetrieverArgs) (*database.Brand, error) {
+	brandID := args.GetPrimary().(uuid.UUID)
+
+	brand, err := database.SelectBrandByID(brandID)
 	if err != nil {
 		return nil, err
 	}
 
-	return mapToBrandResolver(brand), nil
+	return brand, nil
 }
 
-func mapToBrandResolver(brand *database.Brand) *resolvers.BrandResolver {
-	return &resolvers.BrandResolver{
-		BrandID:   scalars.NewUUID(brand.BrandID),
-		Name:      brand.Name,
-		UpdatedAt: scalars.NewNilTimestamp(brand.UpdatedAt),
-		CreatedAt: scalars.NewTimestamp(brand.CreatedAt),
+func (*RetrieveBrand) ByIDs(args objectgraph.RetrieverArgs) ([]*database.Brand, error) {
+	brandIDs := args.GetPrimary().([]uuid.UUID)
+
+	brands, err := database.SelectBrandsByIDs(brandIDs)
+	if err != nil {
+		return nil, err
 	}
+
+	return brands, nil
 }

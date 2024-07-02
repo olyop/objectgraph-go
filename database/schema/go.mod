@@ -1,4 +1,4 @@
-module github.com/olyop/graphql-go/schema
+module github.com/olyop/objectgraph-go/schema
 
 go 1.22.3
 

@@ -12,7 +12,7 @@
 	},
 	"bugs": {
 		"email": "oliver.plummer@outlook.com",
-		"url": "https://github.com/olyop/graphql-go/issues"
+		"url": "https://github.com/olyop/objectgraph-go/issues"
 	},
 	"volta": {
 		"node": "20.14.0",

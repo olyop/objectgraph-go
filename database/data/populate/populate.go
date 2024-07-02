@@ -3,7 +3,7 @@ package populate
 import (
 	"log"
 
-	"github.com/olyop/graphql-go/data/files"
+	"github.com/olyop/objectgraph-go/data/files"
 )
 
 func Execute(data *files.Data) {

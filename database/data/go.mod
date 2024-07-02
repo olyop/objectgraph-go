@@ -1,4 +1,4 @@
-module github.com/olyop/graphql-go/data
+module github.com/olyop/objectgraph-go/data
 
 go 1.22.3
 

@@ -1,27 +1,39 @@
 package database
 
 import (
-	"context"
 	"database/sql"
-	_ "embed"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database/queries"
+	"github.com/olyop/objectgraph/database/queries"
 )
 
-func SelectTop1000Products(ctx context.Context) ([]*Product, error) {
-	rows, err := db.QueryContext(ctx, queries.SelectTop1000Products)
+func SelectProductByID(productID uuid.UUID) (*Product, error) {
+	rows, err := db.Query(queries.SelectProductByID, productID)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	products := make([]*Product, 0)
 	scanner := productRowsScanner(rows)
+	if rows.Next() {
+		return scanner()
+	}
 
+	return nil, nil
+}
+
+func SelectProductsByIDs(productIDs []uuid.UUID) ([]*Product, error) {
+	rows, err := db.Query(queries.SelectProductsByIDs, productIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	products := make([]*Product, len(productIDs))
+	scanner := productRowsScanner(rows)
 	for rows.Next() {
 		product, err := scanner()
 		if err != nil {
@@ -34,27 +46,32 @@ func SelectTop1000Products(ctx context.Context) ([]*Product, error) {
 	return products, nil
 }
 
-func SelectProductByID(ctx context.Context, productID uuid.UUID) (*Product, error) {
-	rows, err := db.QueryContext(ctx, queries.SelectProductByID, productID)
+func SelectTop1000Products() ([]*Product, error) {
+	rows, err := db.Query(queries.SelectTop1000Products)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
+	products := make([]*Product, 0)
 	scanner := productRowsScanner(rows)
+	for rows.Next() {
+		product, err := scanner()
+		if err != nil {
+			return nil, err
+		}
 
-	if rows.Next() {
-		return scanner()
+		products = append(products, product)
 	}
 
-	return nil, fmt.Errorf("product with id %s not found", productID)
+	return products, nil
 }
 
 func productRowsScanner(scanner Scanner) func() (*Product, error) {
 	return func() (*Product, error) {
 		var product Product
-
+		var price sql.NullInt32
 		var abv sql.NullInt32
 		var volume sql.NullInt32
 		var promotionDiscount sql.NullInt32
@@ -66,7 +83,7 @@ func productRowsScanner(scanner Scanner) func() (*Product, error) {
 			&product.ProductID,
 			&product.Name,
 			&product.BrandID,
-			&product.Price,
+			&price,
 			&abv,
 			&volume,
 			&promotionDiscount,
@@ -74,51 +91,37 @@ func productRowsScanner(scanner Scanner) func() (*Product, error) {
 			&updatedAt,
 			&createdAt,
 		}
-
 		err := scanner.Scan(cols...)
 		if err != nil {
 			return nil, err
 		}
 
+		if price.Valid {
+			value := int(price.Int32)
+			product.Price = &value
+		}
 		if abv.Valid {
 			value := int(abv.Int32)
 			product.ABV = &value
 		}
-
 		if volume.Valid {
 			value := int(volume.Int32)
 			product.Volume = &value
 		}
-
 		if promotionDiscount.Valid {
 			value := int(promotionDiscount.Int32)
 			product.PromotionDiscount = &value
 		}
-
 		if promotionDiscountMultiple.Valid {
 			value := int(promotionDiscountMultiple.Int32)
 			product.PromotionDiscountMultiple = &value
 		}
-
 		if updatedAt.Valid {
-			product.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+			value := time.UnixMilli(updatedAt.Int64)
+			product.UpdatedAt = &value
 		}
-
 		product.CreatedAt = time.UnixMilli(createdAt)
 
 		return &product, nil
 	}
-}
-
-type Product struct {
-	ProductID                 uuid.UUID
-	Name                      string
-	BrandID                   uuid.UUID
-	Price                     int
-	ABV                       *int
-	Volume                    *int
-	PromotionDiscount         *int
-	PromotionDiscountMultiple *int
-	UpdatedAt                 time.Time
-	CreatedAt                 time.Time
 }

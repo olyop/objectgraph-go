@@ -1,16 +1,15 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database/queries"
+	"github.com/olyop/objectgraph/database/queries"
 )
 
-func SelectContactsByUserID(ctx context.Context, userID uuid.UUID) ([]*Contact, error) {
-	rows, err := db.QueryContext(ctx, queries.SelectContactsByUserID, userID)
+func SelectContactsByUserID(userID uuid.UUID) ([]*Contact, error) {
+	rows, err := db.Query(queries.SelectContactsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +34,6 @@ func SelectContactsByUserID(ctx context.Context, userID uuid.UUID) ([]*Contact, 
 func contactsRowScanner(scanner Scanner) func() (*Contact, error) {
 	return func() (*Contact, error) {
 		var contact Contact
-
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
@@ -46,26 +44,17 @@ func contactsRowScanner(scanner Scanner) func() (*Contact, error) {
 			&updatedAt,
 			&createdAt,
 		}
-
 		err := scanner.Scan(cols...)
 		if err != nil {
 			return nil, err
 		}
 
 		if updatedAt.Valid {
-			contact.UpdatedAt = time.UnixMilli(updatedAt.Int64)
+			value := time.UnixMilli(updatedAt.Int64)
+			contact.UpdatedAt = &value
 		}
-
 		contact.CreatedAt = time.UnixMilli(createdAt)
 
 		return &contact, nil
 	}
-}
-
-type Contact struct {
-	ContactID uuid.UUID
-	Value     string
-	Type      string
-	UpdatedAt time.Time
-	CreatedAt time.Time
 }

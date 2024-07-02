@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/files"
+	"github.com/olyop/objectgraph-go/data/database"
+	"github.com/olyop/objectgraph-go/data/files"
 )
 
 func populateBrands(data *files.Data) (map[string]string, map[string][]string) {

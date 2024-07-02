@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
 
-func Connect() {
+func Connect() error {
 	var err error
 
 	hostname := os.Getenv("POSTGRES_HOSTNAME")
@@ -21,15 +23,17 @@ func Connect() {
 
 	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	db.SetMaxOpenConns(99)
 
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func Close() {

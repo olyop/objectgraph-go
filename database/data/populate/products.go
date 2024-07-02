@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/files"
+	"github.com/olyop/objectgraph-go/data/database"
+	"github.com/olyop/objectgraph-go/data/files"
 )
 
 func populateProducts(data *files.Data, brands map[string]string, categories map[string]string, classificationsToBrands map[string][]string) []product {

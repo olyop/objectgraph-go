@@ -1,6 +1,6 @@
 type Classification {
-	classificationID: UUID!
-	name: String!
-	updatedAt: Timestamp
-	createdAt: Timestamp!
+	classificationID: UUID! @data(field: "Classification/ClassificationID")
+	name: String! @data(field: "Classification/Name")
+	updatedAt: Timestamp @data(field: "Classification/UpdatedAt")
+	createdAt: Timestamp! @data(field: "Classification/CreatedAt")
 }

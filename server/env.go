@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path"
 
@@ -11,7 +10,7 @@ import (
 func loadEnv() string {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Default().Fatal("Error getting working directory")
+		panic(err)
 	}
 
 	root := path.Dir(wd)
@@ -19,12 +18,12 @@ func loadEnv() string {
 
 	err = godotenv.Load(dotEnvPath)
 	if err != nil {
-		log.Default().Fatal("Error loading .env file")
+		panic(err)
 	}
 
 	env := os.Getenv("GO_ENV")
 	if env == "" {
-		log.Default().Fatal("GO_ENV is not set")
+		panic("GO_ENV is not set")
 	}
 
 	return env

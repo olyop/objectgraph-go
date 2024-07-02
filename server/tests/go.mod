@@ -1,4 +1,4 @@
-module github.com/olyop/graphql-go/tests
+module github.com/olyop/objectgraph-go/tests
 
 go 1.22.3
 

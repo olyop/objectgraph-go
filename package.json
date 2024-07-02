@@ -5,15 +5,15 @@
 	"description": "graphql-go",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/olyop/graphqlops-go.git"
+		"url": "git+https://github.com/olyop/objectgraph.git"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/olyop/graphql-go/issues"
+		"url": "https://github.com/olyop/objectgraph-go/issues"
 	},
-	"homepage": "https://github.com/olyop/graphql-go#readme",
+	"homepage": "https://github.com/olyop/objectgraph-go#readme",
 	"volta": {
 		"node": "20.14.0",
 		"npm": "10.8.1"

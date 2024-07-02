@@ -5,7 +5,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/olyop/graphql-go/schema/database"
+	"github.com/olyop/objectgraph-go/schema/database"
 )
 
 //go:embed schema.sql

@@ -1,38 +1,42 @@
 package retrievers
 
 import (
-	"context"
-
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database"
-	"github.com/olyop/graphqlops-go/graphql/resolvers"
-	"github.com/olyop/graphqlops-go/graphql/scalars"
-	"github.com/olyop/graphqlops-go/graphqlops"
+	"github.com/olyop/objectgraph/database"
+	"github.com/olyop/objectgraph/objectgraph"
 )
 
-func (*Retrievers) RetrieveProductCategories(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
-	productID := args["productID"].(uuid.UUID)
+type RetrieveCategory struct{}
 
-	categories, err := database.SelectCategoriesByProductID(ctx, productID)
+func (*RetrieveCategory) ByID(args objectgraph.RetrieverArgs) (*database.Category, error) {
+	categoryID := args.GetPrimary().(uuid.UUID)
+
+	category, err := database.SelectCategoryByID(categoryID)
 	if err != nil {
 		return nil, err
 	}
 
-	r := make([]*resolvers.CategoryResolver, len(categories))
-	for i := range categories {
-		r[i] = mapToCategoryResolver(categories[i])
-	}
-
-	return &r, nil
+	return category, nil
 }
 
-func mapToCategoryResolver(category *database.Category) *resolvers.CategoryResolver {
-	return &resolvers.CategoryResolver{
-		Category: category,
+func (*RetrieveCategory) ByIDs(args objectgraph.RetrieverArgs) ([]*database.Category, error) {
+	categoryIDs := args.GetPrimary().([]uuid.UUID)
 
-		CategoryID: scalars.NewUUID(category.CategoryID),
-		Name:       category.Name,
-		UpdatedAt:  scalars.NewNilTimestamp(category.UpdatedAt),
-		CreatedAt:  scalars.NewTimestamp(category.CreatedAt),
+	categories, err := database.SelectCategoriesByIDs(categoryIDs)
+	if err != nil {
+		return nil, err
 	}
+
+	return categories, nil
+}
+
+func (*RetrieveCategory) AllByProductID(args objectgraph.RetrieverArgs) ([]*database.Category, error) {
+	productID := args.GetArg("productID").(uuid.UUID)
+
+	categories, err := database.SelectCategoriesByProductID(productID)
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }

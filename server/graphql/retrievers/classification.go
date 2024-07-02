@@ -1,31 +1,31 @@
 package retrievers
 
 import (
-	"context"
-
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database"
-	"github.com/olyop/graphqlops-go/graphql/resolvers"
-	"github.com/olyop/graphqlops-go/graphql/scalars"
-	"github.com/olyop/graphqlops-go/graphqlops"
+	"github.com/olyop/objectgraph/database"
+	"github.com/olyop/objectgraph/objectgraph"
 )
 
-func (*Retrievers) RetrieveClassificationByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
-	classificationID := args["classificationID"].(uuid.UUID)
+type RetrieveClassification struct{}
 
-	classification, err := database.SelectClassificationByID(ctx, classificationID)
+func (*RetrieveClassification) ByID(args objectgraph.RetrieverArgs) (*database.Classification, error) {
+	classificationID := args.GetPrimary().(uuid.UUID)
+
+	classification, err := database.SelectClassificationByID(classificationID)
 	if err != nil {
 		return nil, err
 	}
 
-	return mapToClassificationResolver(classification), nil
+	return classification, nil
 }
 
-func mapToClassificationResolver(classification *database.Classification) *resolvers.ClassificationResolver {
-	return &resolvers.ClassificationResolver{
-		ClassificationID: scalars.NewUUID(classification.ClassificationID),
-		Name:             classification.Name,
-		UpdatedAt:        scalars.NewNilTimestamp(classification.UpdatedAt),
-		CreatedAt:        scalars.NewTimestamp(classification.CreatedAt),
+func (*RetrieveClassification) ByIDs(args objectgraph.RetrieverArgs) ([]*database.Classification, error) {
+	classificationIDs := args.GetPrimary().([]uuid.UUID)
+
+	classifications, err := database.SelectClassificationsByIDs(classificationIDs)
+	if err != nil {
+		return nil, err
 	}
+
+	return classifications, nil
 }

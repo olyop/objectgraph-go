@@ -1,63 +1,29 @@
 package retrievers
 
 import (
-	"context"
-
 	"github.com/google/uuid"
-	"github.com/olyop/graphqlops-go/database"
-	"github.com/olyop/graphqlops-go/graphql/resolvers"
-	"github.com/olyop/graphqlops-go/graphql/scalars"
-	"github.com/olyop/graphqlops-go/graphqlops"
+	"github.com/olyop/objectgraph/database"
+	"github.com/olyop/objectgraph/objectgraph"
 )
 
-func (*Retrievers) RetrieveProductByID(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
-	productID := args["productID"].(uuid.UUID)
+type RetrieveProduct struct{}
 
-	product, err := database.SelectProductByID(ctx, productID)
+func (*RetrieveProduct) ByID(args objectgraph.RetrieverArgs) (*database.Product, error) {
+	productID := args.GetPrimary().(uuid.UUID)
+
+	product, err := database.SelectProductByID(productID)
 	if err != nil {
 		return nil, err
 	}
 
-	return mapToProductResolver(product), nil
+	return product, nil
 }
 
-func (*Retrievers) RetrieveTop1000Products(ctx context.Context, args graphqlops.RetrieverArgs) (any, error) {
-	products, err := database.SelectTop1000Products(ctx)
+func (*RetrieveProduct) Top1000(args objectgraph.RetrieverArgs) ([]*database.Product, error) {
+	products, err := database.SelectTop1000Products()
 	if err != nil {
 		return nil, err
 	}
 
-	r := make([]*resolvers.ProductResolver, len(products))
-	for i, product := range products {
-		r[i] = mapToProductResolver(product)
-	}
-
-	return &r, nil
-}
-
-func mapToProductResolver(product *database.Product) *resolvers.ProductResolver {
-	return &resolvers.ProductResolver{
-		Product: product,
-
-		ProductID:                 scalars.NewUUID(product.ProductID),
-		Name:                      product.Name,
-		Volume:                    scalars.NullInt(product.Volume),
-		ABV:                       scalars.NullInt(product.ABV),
-		Price:                     scalars.NewPrice(product.Price),
-		PromotionDiscount:         scalars.NewNilPrice(product.PromotionDiscount),
-		PromotionDiscountMultiple: scalars.NullInt(product.PromotionDiscountMultiple),
-		PromotionPrice:            scalars.NewPrice(calculatePromotionPrice(product.Price, product.PromotionDiscount)),
-		UpdatedAt:                 scalars.NewNilTimestamp(product.UpdatedAt),
-		CreatedAt:                 scalars.NewTimestamp(product.CreatedAt),
-	}
-}
-
-func calculatePromotionPrice(price int, discount *int) int {
-	value := price
-
-	if discount != nil {
-		value = price - *discount
-	}
-
-	return value
+	return products, nil
 }

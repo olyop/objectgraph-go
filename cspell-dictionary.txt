@@ -9,6 +9,7 @@ dbname
 godotenv
 gqlparser
 gqls
+Graphi
 graphqlcompiler
 graphqlgo
 graphqlparser

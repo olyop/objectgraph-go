@@ -2,9 +2,9 @@ package main
 
 import (
 	_ "github.com/lib/pq"
-	"github.com/olyop/graphql-go/data/database"
-	"github.com/olyop/graphql-go/data/files"
-	"github.com/olyop/graphql-go/data/populate"
+	"github.com/olyop/objectgraph-go/data/database"
+	"github.com/olyop/objectgraph-go/data/files"
+	"github.com/olyop/objectgraph-go/data/populate"
 )
 
 func main() {

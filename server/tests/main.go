@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/olyop/graphql-go/tests/fs"
-	"github.com/olyop/graphql-go/tests/graphql"
-	"github.com/olyop/graphql-go/tests/utils"
+	"github.com/olyop/objectgraph-go/tests/fs"
+	"github.com/olyop/objectgraph-go/tests/graphql"
+	"github.com/olyop/objectgraph-go/tests/utils"
 )
 
 func main() {

@@ -1,12 +1,7 @@
 type Contact {
-	contactID: UUID!
-	value: String!
-	contactType: ContactType!
-	updatedAt: Timestamp
-	createdAt: Timestamp!
-}
-
-enum ContactType {
-	EmailAddress
-	MobileNumber
+	contactID: UUID! @data(field: "Contact/ContactID")
+	contactValue: String! @data(field: "Contact/ContactValue")
+	contactType: ContactType! @data(field: "Contact/ContactType")
+	updatedAt: Timestamp @data(field: "Contact/UpdatedAt")
+	createdAt: Timestamp! @data(field: "Contact/CreatedAt")
 }

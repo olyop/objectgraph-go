@@ -1,7 +1,8 @@
 type Category {
-	categoryID: UUID!
-	name: String!
-	classification: Classification!
-	updatedAt: Timestamp
-	createdAt: Timestamp!
+	categoryID: UUID! @data(field: "Category/CategoryID")
+	name: String! @data(field: "Category/Name")
+	updatedAt: Timestamp @data(field: "Category/UpdatedAt")
+	createdAt: Timestamp! @data(field: "Category/CreatedAt")
+
+	classification: Classification! @retrieve(key: "Classification/ByID", args: ["primary=Category/ClassificationID"])
 }

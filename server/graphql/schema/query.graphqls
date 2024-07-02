@@ -1,6 +1,6 @@
 type Query {
-	getUsers: [User!]!
-	getProducts: [Product!]!
+	getUsers: [User!]! @retrieve(key: "User/Top1000")
+	getProducts: [Product!]! @retrieve(key: "Product/Top1000")
 
-	getProductByID(productID: UUID!): Product
+	getProductByID(productID: UUID! @args(key: "primary")): Product @retrieve(key: "Product/ByID")
 }

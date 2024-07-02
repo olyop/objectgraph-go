@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/olyop/graphql-go/data/database"
+	"github.com/olyop/objectgraph-go/data/database"
 )
 
 func clearTables() {
