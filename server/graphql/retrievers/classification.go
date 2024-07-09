@@ -8,8 +8,8 @@ import (
 
 type RetrieveClassification struct{}
 
-func (*RetrieveClassification) ByID(args objectgraph.RetrieverArgs) (*database.Classification, error) {
-	classificationID := args.GetPrimary().(uuid.UUID)
+func (*RetrieveClassification) ByID(args objectgraph.RetrieverInput) (*database.Classification, error) {
+	classificationID := args.PrimaryID.(uuid.UUID)
 
 	classification, err := database.SelectClassificationByID(classificationID)
 	if err != nil {
@@ -19,8 +19,8 @@ func (*RetrieveClassification) ByID(args objectgraph.RetrieverArgs) (*database.C
 	return classification, nil
 }
 
-func (*RetrieveClassification) ByIDs(args objectgraph.RetrieverArgs) ([]*database.Classification, error) {
-	classificationIDs := args.GetPrimary().([]uuid.UUID)
+func (*RetrieveClassification) ByIDs(args objectgraph.RetrieverInput) ([]*database.Classification, error) {
+	classificationIDs := args.PrimaryID.([]uuid.UUID)
 
 	classifications, err := database.SelectClassificationsByIDs(classificationIDs)
 	if err != nil {

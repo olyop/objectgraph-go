@@ -2,6 +2,7 @@ package objectcache
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -12,9 +13,9 @@ func (oc *ObjectCache) Get(
 	cacheKey string,
 	ttl time.Duration,
 ) (any, bool, error) {
-	cacheGroup := oc.getCacheGroup(groupKey)
+	inmemoryCache := oc.objectCache[groupKey]
 
-	object, exists := cacheGroup.Get(cacheKey)
+	object, exists := inmemoryCache.Get(cacheKey)
 	if exists {
 		return object, true, nil
 	}
@@ -25,7 +26,7 @@ func (oc *ObjectCache) Get(
 	defer objectlocker.Unlock()
 
 	// check again for where another goroutine has already fetched the object
-	object, exists = cacheGroup.Get(cacheKey)
+	object, exists = inmemoryCache.Get(cacheKey)
 	if exists {
 		return object, true, nil
 	}
@@ -33,19 +34,19 @@ func (oc *ObjectCache) Get(
 	// fetch the object from redis
 	object, exists, err := oc.redisGet(groupKey, cacheKey)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	if exists {
-		cacheGroup.Set(cacheKey, object, ttl)
+		inmemoryCache.Set(cacheKey, object, ttl)
 
 		return object, true, nil
 	}
 
-	return "", false, nil
+	return nil, false, nil
 }
 
-func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (string, bool, error) {
+func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (any, bool, error) {
 	redisKey := oc.redisKey(groupKey, cacheKey)
 
 	result, err := oc.redis.Get(context.Background(), redisKey).Bytes()
@@ -55,5 +56,20 @@ func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (string, bool,
 		return "", false, err
 	}
 
-	return string(result), true, nil
+	object, err := redisDeserializeObject(result)
+	if err != nil {
+		return "", false, err
+	}
+
+	return object, true, nil
+}
+
+func redisDeserializeObject(value []byte) (any, error) {
+	var object any
+	err := json.Unmarshal(value, &object)
+	if err != nil {
+		return nil, err
+	}
+
+	return object, nil
 }

@@ -1,7 +1,7 @@
 type Contact {
-	contactID: UUID! @data(field: "Contact/ContactID")
-	contactValue: String! @data(field: "Contact/ContactValue")
-	contactType: ContactType! @data(field: "Contact/ContactType")
-	updatedAt: Timestamp @data(field: "Contact/UpdatedAt")
-	createdAt: Timestamp! @data(field: "Contact/CreatedAt")
+	contactID: UUID! @object(field: "Contact/ContactID")
+	contactValue: String! @object(field: "Contact/ContactValue")
+	contactType: ContactType! @object(field: "Contact/ContactType")
+	updatedAt: Timestamp @object(field: "Contact/UpdatedAt")
+	createdAt: Timestamp! @object(field: "Contact/CreatedAt")
 }

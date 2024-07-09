@@ -1,6 +1,6 @@
 type Brand {
-	brandID: UUID! @data(field: "Brand/BrandID")
-	name: String! @data(field: "Brand/Name")
-	updatedAt: Timestamp @data(field: "Brand/UpdatedAt")
-	createdAt: Timestamp! @data(field: "Brand/CreatedAt")
+	brandID: UUID! @object(field: "Brand/BrandID")
+	name: String! @object(field: "Brand/Name")
+	updatedAt: Timestamp @object(field: "Brand/UpdatedAt")
+	createdAt: Timestamp! @object(field: "Brand/CreatedAt")
 }

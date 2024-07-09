@@ -5,10 +5,9 @@ schema {
 
 scalar UUID
 scalar Timestamp
-scalar Price
 
 directive @primary on FIELD_DEFINITION | ARGUMENT_DEFINITION
 directive @cache(ttl: String!) on FIELD_DEFINITION | OBJECT
-directive @data(field: String!) on FIELD_DEFINITION
+directive @object(field: String!) on FIELD_DEFINITION
 directive @retrieve(key: String!, args: [String!]) on FIELD_DEFINITION
-directive @args(key: String!) on ARGUMENT_DEFINITION
+directive @arg(key: String!) on ARGUMENT_DEFINITION | FIELD_DEFINITION

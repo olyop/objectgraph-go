@@ -15,10 +15,12 @@ graphqlgo
 graphqlparser
 inmemorycache
 joho
+milli
 ollies
 patrickmn
 postgres
 redis
+retrieverer
 Sauvignon
 sslmode
 Tooheys

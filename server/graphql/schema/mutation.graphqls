@@ -1,5 +1,5 @@
 type Mutation {
 	clearCache: Boolean!
 
-	updateProductByID(input: UpdateProductInput!): Product @retrieve(key: "Product/ByID")
+	updateProductByID(input: UpdateProductInput!): Product! @retrieve(key: "Product/ByID")
 }

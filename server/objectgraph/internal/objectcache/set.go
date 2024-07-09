@@ -9,32 +9,25 @@ import (
 func (oc *ObjectCache) Set(
 	groupKey string,
 	cacheKey string,
-	value any,
+	object any,
 	ttl time.Duration,
 ) error {
-	cacheGroup := oc.getCacheGroup(groupKey)
-
-	jsonData, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-
-	json := string(jsonData)
+	inmemoryCache := oc.objectCache[groupKey]
 
 	objectlocker := oc.getObjectLocker(groupKey, cacheKey)
 	objectlocker.Lock()
 	defer objectlocker.Unlock()
 
-	// set the object in the cache
-	cacheGroup.Set(cacheKey, json, ttl)
-
 	// set the object in redis
-	err = oc.redisSet(groupKey, cacheKey, json, ttl)
+	err := oc.redisSet(groupKey, cacheKey, object, ttl)
 	if err != nil {
-		cacheGroup.Delete(cacheKey)
+		inmemoryCache.Delete(cacheKey)
 
 		return err
 	}
+
+	// set the object in the cache
+	inmemoryCache.Set(cacheKey, object, ttl)
 
 	return nil
 }
@@ -42,15 +35,29 @@ func (oc *ObjectCache) Set(
 func (oc *ObjectCache) redisSet(
 	groupKey string,
 	cacheKey string,
-	value string,
+	object any,
 	ttl time.Duration,
 ) error {
 	redisKey := oc.redisKey(groupKey, cacheKey)
 
-	_, err := oc.redis.Set(context.Background(), redisKey, value, ttl).Result()
+	json, err := redisSerializeObject(object)
+	if err != nil {
+		return err
+	}
+
+	err = oc.redis.Set(context.Background(), redisKey, json, ttl).Err()
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func redisSerializeObject(value any) (string, error) {
+	jsonData, err := json.Marshal(value)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonData), nil
 }

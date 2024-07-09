@@ -8,7 +8,7 @@ func (oc *ObjectCache) Delete(
 	groupKey string,
 	cacheKey string,
 ) error {
-	cacheGroup := oc.getCacheGroup(groupKey)
+	inmemoryCache := oc.objectCache[groupKey]
 
 	objectlocker := oc.getObjectLocker(groupKey, cacheKey)
 	objectlocker.Lock()
@@ -19,7 +19,7 @@ func (oc *ObjectCache) Delete(
 		return err
 	}
 
-	cacheGroup.Delete(cacheKey)
+	inmemoryCache.Delete(cacheKey)
 
 	return nil
 }

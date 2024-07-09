@@ -8,8 +8,8 @@ import (
 
 type RetrieveUser struct{}
 
-func (*RetrieveUser) ByID(args objectgraph.RetrieverArgs) (*database.User, error) {
-	userID := args.GetPrimary().(uuid.UUID)
+func (*RetrieveUser) ByID(args objectgraph.RetrieverInput) (*database.User, error) {
+	userID := args.PrimaryID.(uuid.UUID)
 
 	user, err := database.SelectUserByID(userID)
 	if err != nil {
@@ -19,8 +19,8 @@ func (*RetrieveUser) ByID(args objectgraph.RetrieverArgs) (*database.User, error
 	return user, nil
 }
 
-func (*RetrieveUser) ByIDs(args objectgraph.RetrieverArgs) ([]*database.User, error) {
-	userIDs := args.GetPrimary().([]uuid.UUID)
+func (*RetrieveUser) ByIDs(args objectgraph.RetrieverInput) ([]*database.User, error) {
+	userIDs := args.PrimaryID.([]uuid.UUID)
 
 	users, err := database.SelectUsersByIDs(userIDs)
 	if err != nil {
@@ -30,7 +30,7 @@ func (*RetrieveUser) ByIDs(args objectgraph.RetrieverArgs) ([]*database.User, er
 	return users, nil
 }
 
-func (*RetrieveUser) Top1000(rgs objectgraph.RetrieverArgs) ([]*database.User, error) {
+func (*RetrieveUser) Top1000() ([]*database.User, error) {
 	users, err := database.SelectTop1000Users()
 	if err != nil {
 		return nil, err

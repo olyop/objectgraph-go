@@ -2,40 +2,42 @@ package objectgraph
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/olyop/objectgraph/objectgraph/internal/compiler"
+	"github.com/olyop/objectgraph/objectgraph/internal/objectcache"
 	"github.com/olyop/objectgraph/objectgraph/internal/parser"
-	"github.com/olyop/objectgraph/objectgraph/objectcache"
 )
 
 type Engine struct {
-	objectCache *objectcache.ObjectCache
-	config      *EngineConfiguration
+	config      *Configuration
 	schema      *graphql.Schema
+	objectCache *objectcache.ObjectCache
 }
 
-func NewEngine(config *EngineConfiguration) (*Engine, error) {
-	config.validate()
-
-	types := config.getTypes()
-
+func NewEngine(config *Configuration) (*Engine, error) {
 	schemaAst, err := parser.LoadSchema(config.SourceFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	objectcache, err := objectcache.New(config.Cache)
+	err = config.validate()
 	if err != nil {
 		return nil, err
 	}
 
-	schema, err := compiler.CompileSchema(schemaAst, objectcache)
+	typeNames := config.getTypeNames()
+
+	objectcache, err := objectcache.New(config.CachePrefix, config.CacheRedis, typeNames)
+	if err != nil {
+		return nil, err
+	}
+
+	schema, err := compileSchema(config, schemaAst, objectcache)
 	if err != nil {
 		return nil, err
 	}
 
 	e := &Engine{
-		schema:      schema,
 		config:      config,
+		schema:      schema,
 		objectCache: objectcache,
 	}
 

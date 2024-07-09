@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"runtime"
 
 	_ "github.com/lib/pq"
 )
@@ -19,14 +20,14 @@ func Connect() error {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	ctimeout := os.Getenv("POSTGRES_CTIMEOUT")
 
-	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s connect_timeout=%s", hostname, username, password, database, ctimeout)
+	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s connect_timeout=%s sslmode=disable", hostname, username, password, database, ctimeout)
 
 	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		return err
 	}
 
-	db.SetMaxOpenConns(99)
+	db.SetMaxOpenConns(runtime.GOMAXPROCS(0))
 
 	err = db.Ping()
 	if err != nil {

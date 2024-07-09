@@ -1,12 +1,11 @@
 type User {
-	userID: UUID! @data(field: "User/UserID")
+	userID: UUID! @object(field: "User/UserID")
+	userName: String! @object(field: "User/UserName")
+	firstName: String! @object(field: "User/FirstName")
+	lastName: String! @object(field: "User/LastName")
+	dob: Timestamp! @object(field: "User/DOB")
+	updatedAt: Timestamp @object(field: "User/UpdatedAt")
+	createdAt: Timestamp! @object(field: "User/CreatedAt")
 
-	userName: String! @data(field: "User/UserName")
-	firstName: String! @data(field: "User/FirstName")
-	lastName: String! @data(field: "User/LastName")
-	dob: Timestamp! @data(field: "User/DOB")
-	updatedAt: Timestamp @data(field: "User/UpdatedAt")
-	createdAt: Timestamp! @data(field: "User/CreatedAt")
-
-	contacts: [Contact!]! @retrieve(key: "Contact/AllByUserID", args: ["primary=User/UserID"])
+	contacts: [Contact!]! @retrieve(key: "Contact/AllByUserID", args: ["userID=User/UserID"])
 }

@@ -8,8 +8,8 @@ import (
 
 type RetrieveContact struct{}
 
-func (*RetrieveContact) AllByUserID(args objectgraph.RetrieverArgs) ([]*database.Contact, error) {
-	userID := args.GetPrimary().(uuid.UUID)
+func (*RetrieveContact) AllByUserID(args objectgraph.RetrieverInput) ([]*database.Contact, error) {
+	userID := args.Args["userID"].(uuid.UUID)
 
 	contacts, err := database.SelectContactsByUserID(userID)
 	if err != nil {

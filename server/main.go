@@ -20,8 +20,7 @@ func main() {
 	}
 	defer database.Close()
 
-	engineConfig := createEngineConfiguration()
-	engine, err := objectgraph.NewEngine(engineConfig)
+	engine, err := objectgraph.NewEngine(engineConfiguration())
 	if err != nil {
 		panic(err)
 	}
