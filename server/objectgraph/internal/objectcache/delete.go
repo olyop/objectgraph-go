@@ -10,7 +10,7 @@ func (oc *ObjectCache) Delete(
 ) error {
 	inmemoryCache := oc.objectCache[groupKey]
 
-	objectlocker := oc.getObjectLocker(groupKey, cacheKey)
+	objectlocker := oc.objectLocker(groupKey, cacheKey)
 	objectlocker.Lock()
 	defer objectlocker.Unlock()
 

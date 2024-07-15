@@ -1,7 +1,21 @@
 type Contact {
-	contactID: UUID! @object(field: "Contact/ContactID")
-	contactValue: String! @object(field: "Contact/ContactValue")
-	contactType: ContactType! @object(field: "Contact/ContactType")
-	updatedAt: Timestamp @object(field: "Contact/UpdatedAt")
-	createdAt: Timestamp! @object(field: "Contact/CreatedAt")
+	contactID: UUID!
+		@object(key: "Contact/ContactID")
+		@cache(ttl: "1d")
+
+	contactValue: String!
+		@object(key: "Contact/ContactValue")
+		@cache(ttl: "1d")
+
+	contactType: ContactType!
+		@object(key: "Contact/ContactType")
+		@cache(ttl: "1d")
+
+	updatedAt: Timestamp
+		@object(key: "Contact/UpdatedAt")
+		@cache(ttl: "1d")
+
+	createdAt: Timestamp!
+		@object(key: "Contact/CreatedAt")
+		@cache(ttl: "1d")
 }

@@ -1,11 +1,34 @@
 type User {
-	userID: UUID! @object(field: "User/UserID")
-	userName: String! @object(field: "User/UserName")
-	firstName: String! @object(field: "User/FirstName")
-	lastName: String! @object(field: "User/LastName")
-	dob: Timestamp! @object(field: "User/DOB")
-	updatedAt: Timestamp @object(field: "User/UpdatedAt")
-	createdAt: Timestamp! @object(field: "User/CreatedAt")
+	userID: UUID!
+		@object(key: "User/UserID")
+		@cache(ttl: "1d")
 
-	contacts: [Contact!]! @retrieve(key: "Contact/AllByUserID", args: ["userID=User/UserID"])
+	userName: String!
+		@object(key: "User/UserName")
+		@cache(ttl: "1d")
+
+	firstName: String!
+		@object(key: "User/FirstName")
+		@cache(ttl: "1d")
+
+	lastName: String!
+		@object(key: "User/LastName")
+		@cache(ttl: "1d")
+
+	dob: Timestamp!
+		@object(key: "User/DOB")
+		@cache(ttl: "1d")
+
+	updatedAt: Timestamp
+		@object(key: "User/UpdatedAt")
+		@cache(ttl: "1d")
+
+	createdAt: Timestamp!
+		@object(key: "User/CreatedAt")
+		@cache(ttl: "1d")
+
+
+	contacts: [Contact!]!
+		@retrieve(key: "Contact/AllByUserID", args: ["userID=User/UserID"])
+		@cache(ttl: "1d")
 }

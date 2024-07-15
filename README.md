@@ -9,20 +9,55 @@ It should not complicate the layer and should work in a predictable schema-first
 
 ```graphql
 type Query {
-	getTop1000Users: [User!]! @retrieve(key: "User/Top1000")
-	getUserByID(userID: UUID!): User! @retrieve(key: "User/ByID", args: ["primaryID=$userID"])
+	getProductByID(productID: UUID!): Product!
+		@retrieve(key: "Product/ByID", args: ["primaryID=$productID"])
 }
 
-type User {
-	userID: UUID! @object(field: "User/UserID") @cache(ttl: "1d")
-	userName: String! @object(field: "User/UserName") @cache(ttl: "1d")
-	firstName: String! @object(field: "User/FirstName") @cache(ttl: "1d")
-	lastName: String! @object(field: "User/LastName") @cache(ttl: "1d")
-	dob: Timestamp! @object(field: "User/DOB") @cache(ttl: "1d")
-	updatedAt: Timestamp @object(field: "User/UpdatedAt") @cache(ttl: "1d")
-	createdAt: Timestamp! @object(field: "User/CreatedAt") @cache(ttl: "1d")
+type Product {
+	productID: UUID!
+		@object(key: "Product/ProductID")
+		@cache(ttl: "1d")
 
-	contacts: [Contact!]! @retrieve(key: "Contact/AllByUserID", args: ["userID=User/UserID"])
+	name: String!
+		@object(key: "Product/Name")
+		@cache(ttl: "1d")
+
+	price: Int!
+		@object(key: "Product/Price")
+		@cache(ttl: "1d")
+
+	promotionDiscount: Int
+		@object(key: "Product/PromotionDiscount")
+		@cache(ttl: "1d")
+
+	promotionDiscountMultiple: Int
+		@object(key: "Product/PromotionDiscountMultiple")
+		@cache(ttl: "1d")
+
+	volume: Int
+		@object(key: "Product/Volume")
+		@cache(ttl: "1d")
+
+	abv: Int
+		@object(key: "Product/ABV")
+		@cache(ttl: "1d")
+
+	updatedAt: Timestamp
+		@object(key: "Product/UpdatedAt")
+		@cache(ttl: "1d")
+
+	createdAt: Timestamp!
+		@object(key: "Product/CreatedAt")
+		@cache(ttl: "1d")
+
+
+	brand: Brand!
+		@retrieve(key: "Brand/ByID", args: ["primaryID=Product/BrandID"])
+		@cache(ttl: "1d")
+
+	categories: [Category!]!
+		@retrieve(key: "Category/AllByProductID", args: ["productID=Product/ProductID"])
+		@cache(ttl: "1d")
 }
 ```
 
@@ -60,3 +95,5 @@ func (*RetrieveUser) Top1000() ([]*database.User, error) {
 	return users, nil
 }
 ```
+
+For a full example see the [server/graphql/schema](https://github.com/olyop/objectgraph-go/tree/main/server/graphql/schema) directory.

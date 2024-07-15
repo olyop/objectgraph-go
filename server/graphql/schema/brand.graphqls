@@ -1,6 +1,17 @@
 type Brand {
-	brandID: UUID! @object(field: "Brand/BrandID")
-	name: String! @object(field: "Brand/Name")
-	updatedAt: Timestamp @object(field: "Brand/UpdatedAt")
-	createdAt: Timestamp! @object(field: "Brand/CreatedAt")
+	brandID: UUID!
+		@object(key: "Brand/BrandID")
+		@cache(ttl: "1d")
+
+	name: String!
+		@object(key: "Brand/Name")
+		@cache(ttl: "1d")
+
+	updatedAt: Timestamp
+		@object(key: "Brand/UpdatedAt")
+		@cache(ttl: "1d")
+
+	createdAt: Timestamp!
+		@object(key: "Brand/CreatedAt")
+		@cache(ttl: "1d")
 }

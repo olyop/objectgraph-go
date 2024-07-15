@@ -1,1 +1,3 @@
-schema/data.sql
+schema.json
+server/graphql/schema
+README.md

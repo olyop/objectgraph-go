@@ -13,20 +13,18 @@ func (oc *ObjectCache) Get(
 	cacheKey string,
 	ttl time.Duration,
 ) (any, bool, error) {
-	inmemoryCache := oc.objectCache[groupKey]
-
-	object, exists := inmemoryCache.Get(cacheKey)
+	object, exists := oc.inmemoryGet(groupKey, cacheKey)
 	if exists {
 		return object, true, nil
 	}
 
 	// not in the cache, lock the object as only one goroutine should be fetching it
-	objectlocker := oc.getObjectLocker(groupKey, cacheKey)
-	objectlocker.Lock()
-	defer objectlocker.Unlock()
+	objectLocker := oc.objectLocker(groupKey, cacheKey)
+	objectLocker.Lock()
+	defer objectLocker.Unlock()
 
 	// check again for where another goroutine has already fetched the object
-	object, exists = inmemoryCache.Get(cacheKey)
+	object, exists = oc.inmemoryGet(groupKey, cacheKey)
 	if exists {
 		return object, true, nil
 	}
@@ -38,7 +36,7 @@ func (oc *ObjectCache) Get(
 	}
 
 	if exists {
-		inmemoryCache.Set(cacheKey, object, ttl)
+		oc.inmemorySet(groupKey, cacheKey, object, ttl)
 
 		return object, true, nil
 	}
@@ -46,30 +44,32 @@ func (oc *ObjectCache) Get(
 	return nil, false, nil
 }
 
+func (oc *ObjectCache) inmemoryGet(groupKey string, cacheKey string) (any, bool) {
+	objectCache := oc.objectCache[groupKey]
+
+	object, exists := objectCache.Get(cacheKey)
+	if exists {
+		return object, true
+	}
+
+	return nil, false
+}
+
 func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (any, bool, error) {
 	redisKey := oc.redisKey(groupKey, cacheKey)
 
-	result, err := oc.redis.Get(context.Background(), redisKey).Bytes()
+	data, err := oc.redis.Get(context.Background(), redisKey).Bytes()
 	if err == redis.Nil {
-		return "", false, nil
+		return nil, false, nil
 	} else if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
-	object, err := redisDeserializeObject(result)
+	result := make(map[string]any)
+	err = json.Unmarshal(data, &result)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
-	return object, true, nil
-}
-
-func redisDeserializeObject(value []byte) (any, error) {
-	var object any
-	err := json.Unmarshal(value, &object)
-	if err != nil {
-		return nil, err
-	}
-
-	return object, nil
+	return result, true, nil
 }

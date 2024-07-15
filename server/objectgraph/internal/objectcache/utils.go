@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-func (oc *ObjectCache) getObjectLocker(groupKey string, cacheKey string) *sync.Mutex {
+func (oc *ObjectCache) objectLocker(groupKey string, cacheKey string) *sync.Mutex {
 	objectLockerGroup := oc.objectLockers[groupKey]
 
 	objectLocker, initialized := objectLockerGroup[cacheKey]

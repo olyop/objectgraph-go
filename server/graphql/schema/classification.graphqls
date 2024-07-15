@@ -1,6 +1,17 @@
 type Classification {
-	classificationID: UUID! @object(field: "Classification/ClassificationID")
-	name: String! @object(field: "Classification/Name")
-	updatedAt: Timestamp @object(field: "Classification/UpdatedAt")
-	createdAt: Timestamp! @object(field: "Classification/CreatedAt")
+	classificationID: UUID!
+		@object(key: "Classification/ClassificationID")
+		@cache(ttl: "1d")
+
+	name: String!
+		@object(key: "Classification/Name")
+		@cache(ttl: "1d")
+
+	updatedAt: Timestamp
+		@object(key: "Classification/UpdatedAt")
+		@cache(ttl: "1d")
+	
+	createdAt: Timestamp!
+		@object(key: "Classification/CreatedAt")
+		@cache(ttl: "1d")
 }

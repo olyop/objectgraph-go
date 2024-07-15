@@ -12,24 +12,36 @@ func (oc *ObjectCache) Set(
 	object any,
 	ttl time.Duration,
 ) error {
-	inmemoryCache := oc.objectCache[groupKey]
+	objectCache := oc.objectCache[groupKey]
 
-	objectlocker := oc.getObjectLocker(groupKey, cacheKey)
-	objectlocker.Lock()
-	defer objectlocker.Unlock()
+	// lock the object so only one goroutine can set it at a time
+	objectLocker := oc.objectLocker(groupKey, cacheKey)
+	objectLocker.Lock()
+	defer objectLocker.Unlock()
 
 	// set the object in redis
 	err := oc.redisSet(groupKey, cacheKey, object, ttl)
 	if err != nil {
-		inmemoryCache.Delete(cacheKey)
+		objectCache.Delete(cacheKey)
 
 		return err
 	}
 
 	// set the object in the cache
-	inmemoryCache.Set(cacheKey, object, ttl)
+	oc.inmemorySet(groupKey, cacheKey, object, ttl)
 
 	return nil
+}
+
+func (oc *ObjectCache) inmemorySet(
+	groupKey string,
+	cacheKey string,
+	object any,
+	ttl time.Duration,
+) {
+	objectCache := oc.objectCache[groupKey]
+
+	objectCache.Set(cacheKey, object, ttl)
 }
 
 func (oc *ObjectCache) redisSet(
@@ -40,7 +52,7 @@ func (oc *ObjectCache) redisSet(
 ) error {
 	redisKey := oc.redisKey(groupKey, cacheKey)
 
-	json, err := redisSerializeObject(object)
+	json, err := json.Marshal(object)
 	if err != nil {
 		return err
 	}
@@ -51,13 +63,4 @@ func (oc *ObjectCache) redisSet(
 	}
 
 	return nil
-}
-
-func redisSerializeObject(value any) (string, error) {
-	jsonData, err := json.Marshal(value)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonData), nil
 }
