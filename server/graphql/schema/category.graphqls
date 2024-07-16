@@ -2,20 +2,15 @@ type Category {
 	categoryID: UUID!
 		@object(key: "Category/CategoryID")
 		@cache(ttl: "1d")
-
 	name: String!
 		@object(key: "Category/Name")
 		@cache(ttl: "1d")
-	
 	updatedAt: Timestamp
 		@object(key: "Category/UpdatedAt")
 		@cache(ttl: "1d")
-
 	createdAt: Timestamp!
 		@object(key: "Category/CreatedAt")
 		@cache(ttl: "1d")
-
-
 
 	classification: Classification!
 		@retrieve(key: "Classification/ByID", args: ["primary=Category/ClassificationID"])

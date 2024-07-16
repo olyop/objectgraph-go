@@ -75,7 +75,7 @@ func userRowScanner(scanner Scanner) func() (*User, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&user.UserID,
 			&user.UserName,
 			&user.FirstName,

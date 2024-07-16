@@ -75,7 +75,7 @@ func categoryRowScanner(scanner Scanner) func() (*Category, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&category.CategoryID,
 			&category.Name,
 			&category.ClassificationID,

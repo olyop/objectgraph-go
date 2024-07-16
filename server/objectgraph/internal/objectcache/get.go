@@ -3,16 +3,19 @@ package objectcache
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 	"time"
 
+	"github.com/fatih/structs"
 	"github.com/redis/go-redis/v9"
 )
 
 func (oc *ObjectCache) Get(
 	groupKey string,
+	reflectType reflect.Type,
 	cacheKey string,
 	ttl time.Duration,
-) (any, bool, error) {
+) (map[string]any, bool, error) {
 	object, exists := oc.inmemoryGet(groupKey, cacheKey)
 	if exists {
 		return object, true, nil
@@ -30,7 +33,7 @@ func (oc *ObjectCache) Get(
 	}
 
 	// fetch the object from redis
-	object, exists, err := oc.redisGet(groupKey, cacheKey)
+	object, exists, err := oc.redisGet(groupKey, reflectType, cacheKey)
 	if err != nil {
 		return nil, false, err
 	}
@@ -44,20 +47,19 @@ func (oc *ObjectCache) Get(
 	return nil, false, nil
 }
 
-func (oc *ObjectCache) inmemoryGet(groupKey string, cacheKey string) (any, bool) {
+func (oc *ObjectCache) inmemoryGet(groupKey string, cacheKey string) (map[string]any, bool) {
 	objectCache := oc.objectCache[groupKey]
 
 	object, exists := objectCache.Get(cacheKey)
 	if exists {
-		return object, true
+		return object.(map[string]any), true
 	}
 
 	return nil, false
 }
 
-func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (any, bool, error) {
+func (oc *ObjectCache) redisGet(groupKey string, reflectType reflect.Type, cacheKey string) (map[string]any, bool, error) {
 	redisKey := oc.redisKey(groupKey, cacheKey)
-
 	data, err := oc.redis.Get(context.Background(), redisKey).Bytes()
 	if err == redis.Nil {
 		return nil, false, nil
@@ -65,11 +67,13 @@ func (oc *ObjectCache) redisGet(groupKey string, cacheKey string) (any, bool, er
 		return nil, false, err
 	}
 
-	result := make(map[string]any)
-	err = json.Unmarshal(data, &result)
+	result := reflect.New(reflectType).Interface()
+	err = json.Unmarshal(data, result)
 	if err != nil {
 		return nil, false, err
 	}
 
-	return result, true, nil
+	object := structs.Map(result)
+
+	return object, true, nil
 }

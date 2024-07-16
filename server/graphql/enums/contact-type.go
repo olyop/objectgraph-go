@@ -58,7 +58,7 @@ func (ContactType) ImplementsGraphQLType(name string) bool {
 	return name == "ContactType"
 }
 
-func (c *ContactType) UnmarshalGraphQL(input interface{}) error {
+func (c *ContactType) UnmarshalGraphQL(input any) error {
 	var err error
 	switch input := input.(type) {
 	case string:

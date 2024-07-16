@@ -24,7 +24,7 @@ func populateCategories(data *files.Data, classifications map[string]string) map
 	return categories
 }
 
-func createCategoriesQuery(data *files.Data, classifications map[string]string) (string, []interface{}) {
+func createCategoriesQuery(data *files.Data, classifications map[string]string) (string, []any) {
 	var sql strings.Builder
 	paramsIndex := 0
 	params := initializeParams(data)

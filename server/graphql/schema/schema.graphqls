@@ -6,9 +6,7 @@ schema {
 scalar UUID
 scalar Timestamp
 
-directive
-@cache(ttl: String!) on FIELD_DEFINITION | OBJECT
-directive
-		@object(key: String!) on FIELD_DEFINITION
+directive @cache(ttl: String!) on FIELD_DEFINITION | OBJECT
+directive	@object(key: String!) on FIELD_DEFINITION
 directive @retrieve(key: String!, args: [String!]) on FIELD_DEFINITION
 directive @auth(roles: String!) on FIELD_DEFINITION

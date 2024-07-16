@@ -6,6 +6,7 @@ ctimeout
 CTIMEOUT
 daisyui
 dbname
+fatih
 godotenv
 gqlparser
 gqls

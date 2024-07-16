@@ -61,7 +61,7 @@ func determineProductTypes(classification string) []product {
 
 func populateProductsBatch(products []product, brands map[string]string, categories map[string]string) {
 	var sql strings.Builder
-	productsParams := make([]interface{}, 0)
+	productsParams := make([]any, 0)
 	brandsParamsMap := make(map[string]int)
 
 	sql.WriteString("INSERT INTO products (product_name, brand_id) VALUES ")
@@ -133,7 +133,7 @@ func populateProductsBatch(products []product, brands map[string]string, categor
 
 	productsParamsMap := make(map[string]int)
 
-	productsCategoriesParams := make([]interface{}, 0)
+	productsCategoriesParams := make([]any, 0)
 	productsCategoriesProductIDParamsMap := make(map[string]int)
 	productsCategoriesCategoryIDParamsMap := make(map[string]int)
 

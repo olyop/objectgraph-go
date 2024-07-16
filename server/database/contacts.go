@@ -37,7 +37,7 @@ func contactsRowScanner(scanner Scanner) func() (*Contact, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&contact.ContactID,
 			&contact.Value,
 			&contact.Type,

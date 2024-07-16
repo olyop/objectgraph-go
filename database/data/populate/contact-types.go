@@ -26,7 +26,7 @@ func populateContactTypes(data *files.Data) map[string]string {
 	return contactTypes
 }
 
-func createContactTypesQuery(data *files.Data) (string, []interface{}) {
+func createContactTypesQuery(data *files.Data) (string, []any) {
 	var sql strings.Builder
 	params := make([]string, len(data.ContactTypes))
 

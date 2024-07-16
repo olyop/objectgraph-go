@@ -3,7 +3,6 @@ package database
 import (
 	"time"
 
-	"encoding/json"
 	"github.com/google/uuid"
 )
 
@@ -12,7 +11,6 @@ type Brand struct {
 	Name      string
 	UpdatedAt *time.Time
 	CreatedAt time.Time
-	Foo       json.Marshaler
 }
 
 type Category struct {

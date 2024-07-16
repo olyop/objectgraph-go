@@ -52,7 +52,7 @@ func classificationRowScanner(scanner Scanner) func() (*Classification, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&classification.ClassificationID,
 			&classification.Name,
 			&updatedAt,

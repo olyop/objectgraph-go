@@ -1,6 +1,8 @@
 package retrievers
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/olyop/objectgraph/database"
 	"github.com/olyop/objectgraph/objectgraph"
@@ -28,4 +30,13 @@ func (*RetrieveBrand) ByIDs(args objectgraph.RetrieverInput) ([]*database.Brand,
 	}
 
 	return brands, nil
+}
+
+func (*RetrieveBrand) TestBrand() *database.Brand {
+	return &database.Brand{
+		BrandID:   uuid.New(),
+		Name:      "Test Brand",
+		UpdatedAt: nil,
+		CreatedAt: time.Now(),
+	}
 }

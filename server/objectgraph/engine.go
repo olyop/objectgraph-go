@@ -13,7 +13,7 @@ type Engine struct {
 }
 
 func NewEngine(config *Configuration) (*Engine, error) {
-	schemaAst, err := parser.LoadSchema(config.SourceFiles)
+	_, err := parser.LoadSchema(config.SourceFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -30,14 +30,19 @@ func NewEngine(config *Configuration) (*Engine, error) {
 		return nil, err
 	}
 
-	schema, err := compileSchema(config, schemaAst, objectcache)
+	schemaConfig, err := compileSchemaConfig(config, objectcache)
+	if err != nil {
+		return nil, err
+	}
+
+	schema, err := graphql.NewSchema(*schemaConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	e := &Engine{
 		config:      config,
-		schema:      schema,
+		schema:      &schema,
 		objectCache: objectcache,
 	}
 

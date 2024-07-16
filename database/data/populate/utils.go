@@ -12,8 +12,8 @@ func randRange(min, max int) int {
 	return rand.IntN(max-min) + min
 }
 
-func convertSetToArr[T any](m map[string]T) []interface{} {
-	arr := make([]interface{}, 0)
+func convertSetToArr[T any](m map[string]T) []any {
+	arr := make([]any, 0)
 
 	for k := range m {
 		arr = append(arr, k)
@@ -22,8 +22,8 @@ func convertSetToArr[T any](m map[string]T) []interface{} {
 	return arr
 }
 
-func convertToInterfaceSlice[T any](names []T) []interface{} {
-	interfaces := make([]interface{}, len(names))
+func convertToInterfaceSlice[T any](names []T) []any {
+	interfaces := make([]any, len(names))
 
 	for i, v := range names {
 		interfaces[i] = v

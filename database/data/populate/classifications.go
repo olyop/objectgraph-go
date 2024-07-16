@@ -26,7 +26,7 @@ func populateClassifications(data *files.Data) map[string]string {
 	return classifications
 }
 
-func createClassificationsQuery(data *files.Data) (string, []interface{}) {
+func createClassificationsQuery(data *files.Data) (string, []any) {
 	var sql strings.Builder
 	params := make([]string, len(data.Classifications))
 

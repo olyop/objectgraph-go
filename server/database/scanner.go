@@ -1,5 +1,5 @@
 package database
 
 type Scanner interface {
-	Scan(dest ...interface{}) error
+	Scan(dest ...any) error
 }

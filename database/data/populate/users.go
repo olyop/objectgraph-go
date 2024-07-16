@@ -14,8 +14,8 @@ func populateUsers(data *files.Data, contactTypes map[string]string) map[string]
 	var contactsSql strings.Builder
 	var personsSql strings.Builder
 
-	contactsParams := make([]interface{}, 0)
-	personsParams := make([]interface{}, 0)
+	contactsParams := make([]any, 0)
+	personsParams := make([]any, 0)
 	contactsParams = append(contactsParams, contactTypes["email_address"], contactTypes["mobile_number"])
 	contactsSql.WriteString("INSERT INTO contacts (contact_type_id, contact_value) VALUES ")
 	personsSql.WriteString("INSERT INTO persons (person_first_name, person_last_name, person_dob) VALUES ")
@@ -69,8 +69,8 @@ func populateUsers(data *files.Data, contactTypes map[string]string) map[string]
 
 	var usersSql strings.Builder
 	var personsContactsSql strings.Builder
-	usersParams := make([]interface{}, 0)
-	personsContactsParams := make([]interface{}, 0)
+	usersParams := make([]any, 0)
+	personsContactsParams := make([]any, 0)
 	usersSql.WriteString("INSERT INTO users (user_name) VALUES ")
 	personsContactsSql.WriteString("INSERT INTO persons_contacts (person_id, contact_id) VALUES ")
 
@@ -116,7 +116,7 @@ func populateUsers(data *files.Data, contactTypes map[string]string) map[string]
 	users := usersRowsMapper(usersRows)
 
 	var usersPersonsSql strings.Builder
-	usersPersonsParams := make([]interface{}, 0)
+	usersPersonsParams := make([]any, 0)
 	usersPersonsSql.WriteString("INSERT INTO users_persons (user_id, person_id) VALUES ")
 
 	i = 0

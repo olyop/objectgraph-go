@@ -18,5 +18,7 @@ require (
 	github.com/agnivade/levenshtein v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/fatih/structs v1.1.0 // indirect
+	github.com/liangyaopei/structmap v0.0.0-20200911074950-0e2911025a96 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 )

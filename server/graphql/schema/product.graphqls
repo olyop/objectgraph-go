@@ -2,44 +2,34 @@ type Product {
 	productID: UUID!
 		@object(key: "Product/ProductID")
 		@cache(ttl: "1d")
-
 	name: String!
 		@object(key: "Product/Name")
 		@cache(ttl: "1d")
-
 	price: Int!
 		@object(key: "Product/Price")
 		@cache(ttl: "1d")
-
 	promotionDiscount: Int
 		@object(key: "Product/PromotionDiscount")
 		@cache(ttl: "1d")
-
 	promotionDiscountMultiple: Int
 		@object(key: "Product/PromotionDiscountMultiple")
 		@cache(ttl: "1d")
-
 	volume: Int
 		@object(key: "Product/Volume")
 		@cache(ttl: "1d")
-
 	abv: Int
 		@object(key: "Product/ABV")
 		@cache(ttl: "1d")
-
 	updatedAt: Timestamp
 		@object(key: "Product/UpdatedAt")
 		@cache(ttl: "1d")
-
 	createdAt: Timestamp!
 		@object(key: "Product/CreatedAt")
 		@cache(ttl: "1d")
 
-
 	brand: Brand!
 		@retrieve(key: "Brand/ByID", args: ["primaryID=Product/BrandID"])
 		@cache(ttl: "1d")
-
 	categories: [Category!]!
 		@retrieve(key: "Category/AllByProductID", args: ["productID=Product/ProductID"])
 		@cache(ttl: "1d")

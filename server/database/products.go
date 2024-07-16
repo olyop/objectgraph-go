@@ -79,7 +79,7 @@ func productRowsScanner(scanner Scanner) func() (*Product, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&product.ProductID,
 			&product.Name,
 			&product.BrandID,

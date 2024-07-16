@@ -9,7 +9,7 @@ import (
 func (oc *ObjectCache) Set(
 	groupKey string,
 	cacheKey string,
-	object any,
+	object map[string]any,
 	ttl time.Duration,
 ) error {
 	objectCache := oc.objectCache[groupKey]

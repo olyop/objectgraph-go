@@ -53,7 +53,7 @@ func brandRowMapper(scanner Scanner) func() (*Brand, error) {
 		var updatedAt sql.NullInt64
 		var createdAt int64
 
-		cols := []interface{}{
+		cols := []any{
 			&brand.BrandID,
 			&brand.Name,
 			&updatedAt,

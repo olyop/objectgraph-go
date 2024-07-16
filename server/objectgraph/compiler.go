@@ -3,124 +3,240 @@ package objectgraph
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 
+	"github.com/fatih/structs"
 	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
+	"github.com/olyop/objectgraph/database"
 	"github.com/olyop/objectgraph/objectgraph/internal/objectcache"
-	"github.com/vektah/gqlparser/ast"
 )
 
-func compileSchema(config *Configuration, ast *ast.Schema, objectcache *objectcache.ObjectCache) (*graphql.Schema, error) {
-	sc := newSchemaCompiler(config, ast, objectcache)
-
-	schemaConfig, err := sc.compile()
-	if err != nil {
-		return nil, err
-	}
-
-	schema, err := graphql.NewSchema(schemaConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return &schema, nil
-}
-
-func newSchemaCompiler(config *Configuration, ast *ast.Schema, objectcache *objectcache.ObjectCache) *schemaCompiler {
-	sc := &schemaCompiler{
+func compileSchemaConfig(config *Configuration, objectcache *objectcache.ObjectCache) (*graphql.SchemaConfig, error) {
+	compiler := engineCompiler{
 		config:      config,
-		ast:         ast,
-		objectCache: objectcache,
+		objectcache: objectcache,
 	}
 
-	return sc
+	return compiler.createSchemaConfig()
 }
 
-type schemaCompiler struct {
+type engineCompiler struct {
 	config      *Configuration
-	ast         *ast.Schema
-	objectCache *objectcache.ObjectCache
+	objectcache *objectcache.ObjectCache
 
-	// internal
-	objectsConfig objectConfigs
+	retrieversConfig retreiversConfig
 }
 
-type objectConfigs map[string]*objectConfig
-type objectConfig struct {
-	objectKeyMap objectKeyMap
-	objectType   reflect.Type
-	retreivers   objectRetrievers
-	graphqlType  *graphql.Object
-}
-type objectKeyMap map[string]string
-type objectKey struct {
-	typeName string
-	value    string
-}
-type objectRetrievers map[string]reflect.Value
+func (engine *engineCompiler) createSchemaConfig() (*graphql.SchemaConfig, error) {
+	err := engine.createRetrieversConfig()
+	if err != nil {
+		return nil, err
+	}
 
-func (sc *schemaCompiler) compile() (graphql.SchemaConfig, error) {
-	sc.createObjectKeyMaps()
-	sc.createTypes()
-	sc.createRetrievers()
+	brandType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Brand",
+		Fields: graphql.Fields{
+			"brandID": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["UUID"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Brand", "BrandID")
+				},
+			},
+			"name": &graphql.Field{
+				Type: graphql.NewNonNull(builtInScalars["String"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Brand", "Name")
+				},
+			},
+			"updatedAt": &graphql.Field{
+				Type: engine.config.Scalars["Timestamp"],
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Brand", "UpdatedAt")
+				},
+			},
+			"createdAt": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["Timestamp"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Brand", "CreatedAt")
+				},
+			},
+		},
+	})
+
+	categoryType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Category",
+		Fields: graphql.Fields{
+			"categoryID": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["UUID"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Category", "CategoryID")
+				},
+			},
+			"name": &graphql.Field{
+				Type: graphql.NewNonNull(builtInScalars["String"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Category", "Name")
+				},
+			},
+			"updatedAt": &graphql.Field{
+				Type: engine.config.Scalars["Timestamp"],
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Category", "UpdatedAt")
+				},
+			},
+			"createdAt": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["Timestamp"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Category", "CreatedAt")
+				},
+			},
+		},
+	})
+
+	productType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Product",
+		Fields: graphql.Fields{
+			"productID": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["UUID"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Product", "ProductID")
+				},
+			},
+			"name": &graphql.Field{
+				Type: graphql.NewNonNull(builtInScalars["String"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Product", "Name")
+				},
+			},
+			"updatedAt": &graphql.Field{
+				Type: engine.config.Scalars["Timestamp"],
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Product", "UpdatedAt")
+				},
+			},
+			"createdAt": &graphql.Field{
+				Type: graphql.NewNonNull(engine.config.Scalars["Timestamp"]),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					return objectField(p.Source, "Product", "CreatedAt")
+				},
+			},
+			"brand": &graphql.Field{
+				Type: graphql.NewNonNull(brandType),
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					brandIDValue, err := objectField(p.Source, "Product", "BrandID")
+					if err != nil {
+						return nil, err
+					}
+
+					brandID := brandIDValue.(uuid.UUID)
+
+					object, exists, err := engine.objectcache.Get("Brand", engine.retrieversConfig["Brand"].typ, brandID.String(), time.Minute)
+					if err != nil {
+						return nil, err
+					}
+					if exists {
+						return resolveForType("Brand", object), nil
+					}
+
+					input := RetrieverInput{
+						PrimaryID: brandID,
+					}
+					object, err = engine.execRetriever("Brand", "ByID", input)
+					if err != nil {
+						return nil, err
+					}
+
+					engine.objectcache.Set("Brand", brandID.String(), object, time.Minute)
+
+					return resolveForType("Brand", object), nil
+				},
+			},
+			// "categories": &graphql.Field{
+			// 	Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(categoryType))),
+			// 	Resolve: func(p graphql.ResolveParams) (any, error) {
+			// 		productIDValue, err := objectField(p.Source, "Product", "ProductID")
+			// 		if err != nil {
+			// 			return nil, err
+			// 		}
+
+			// 		productID := productIDValue.(uuid.UUID)
+
+			// 		input := RetrieverInput{
+			// 			PrimaryID: productID,
+			// 		}
+			// 		object, err := engine.execRetriever("Category", "AllByProductID", input)
+			// 		if err != nil {
+			// 			return nil, err
+			// 		}
+
+			// 		engine.objectcache.Set("Category", productID.String(), object, time.Minute)
+
+			// 		return resolveForType("Category", object), nil
+			// 	},
+			// },
+		},
+	})
 
 	queryType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
+			"getBrandByID": &graphql.Field{
+				Type: graphql.NewNonNull(brandType),
+				Args: graphql.FieldConfigArgument{
+					"brandID": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(engine.config.Scalars["UUID"]),
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (any, error) {
+					brandID := p.Args["brandID"].(uuid.UUID)
+
+					object, exists, err := engine.objectcache.Get("Brand", engine.retrieversConfig["Brand"].typ, brandID.String(), time.Minute)
+					if err != nil {
+						return nil, err
+					}
+					if exists {
+						return resolveForType("Brand", object), nil
+					}
+
+					result, err := database.SelectBrandByID(brandID)
+					if err != nil {
+						return nil, err
+					}
+					object = structs.Map(result)
+
+					engine.objectcache.Set("Brand", brandID.String(), object, time.Minute)
+
+					return resolveForType("Brand", object), nil
+				},
+			},
 			"getProductByID": &graphql.Field{
-				Type: sc.objectsConfig["Product"].graphqlType,
+				Type: graphql.NewNonNull(productType),
 				Args: graphql.FieldConfigArgument{
 					"productID": &graphql.ArgumentConfig{
-						Type: sc.config.Scalars["UUID"],
+						Type: graphql.NewNonNull(engine.config.Scalars["UUID"]),
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (any, error) {
 					productID := p.Args["productID"].(uuid.UUID)
 
-					product, exists, err := sc.objectCache.Get("Product", productID.String(), time.Minute)
+					object, exists, err := engine.objectcache.Get("Product", engine.retrieversConfig["Product"].typ, productID.String(), time.Minute)
 					if err != nil {
 						return nil, err
 					}
 					if exists {
-						return sc.mapData("Product", product)
+						return resolveForType("Product", object), nil
 					}
 
-					input := RetrieverInput{
-						PrimaryID: productID,
-					}
-
-					product, err = sc.execRetriever("Product", "ByID", input)
+					result, err := database.SelectProductByID(productID)
 					if err != nil {
 						return nil, err
 					}
+					object = structs.Map(result)
 
-					sc.objectCache.Set("Product", productID.String(), product, time.Minute)
+					engine.objectcache.Set("Product", productID.String(), object, time.Minute)
 
-					return sc.mapData("Product", product)
-				},
-			},
-			"getUsers": &graphql.Field{
-				Type: graphql.NewList(sc.objectsConfig["User"].graphqlType),
-				Resolve: func(p graphql.ResolveParams) (any, error) {
-					users, exists, err := sc.objectCache.Get("Query", "Top1000", time.Minute)
-					if err != nil {
-						return nil, err
-					}
-
-					if exists {
-						return users, nil
-					}
-
-					users, err = sc.execRetriever("Query", "Top1000", RetrieverInput{})
-					if err != nil {
-						return nil, err
-					}
-
-					sc.objectCache.Set("Query", "Top1000", users, time.Minute)
-
-					return users, nil
+					return resolveForType("Product", object), nil
 				},
 			},
 		},
@@ -130,13 +246,9 @@ func (sc *schemaCompiler) compile() (graphql.SchemaConfig, error) {
 		Name: "Mutation",
 		Fields: graphql.Fields{
 			"clearCache": &graphql.Field{
-				Type: graphql.Boolean,
+				Type: graphql.NewNonNull(graphql.Boolean),
 				Resolve: func(p graphql.ResolveParams) (any, error) {
-					err := sc.objectCache.Clear()
-					if err != nil {
-						return false, err
-					}
-
+					engine.objectcache.Clear()
 					return true, nil
 				},
 			},
@@ -148,128 +260,155 @@ func (sc *schemaCompiler) compile() (graphql.SchemaConfig, error) {
 		Mutation: mutationType,
 	}
 
-	return schemaConfig, nil
+	return &schemaConfig, nil
 }
 
-const (
-	directiveObjectKey         = "object"
-	directiveObjectFieldArgKey = "field"
-	directiveRetrieveKey       = "retrieve"
-	directiveRetrieveKeyArgKey = "key"
-)
+// createRetrieversConfig creates a map of retrieversObjectConfig from the configuration
+// it checks that all methods on the retrievers object have the correct signature
+// and that they all return the same type
+func (engine *engineCompiler) createRetrieversConfig() error {
+	rc := make(retreiversConfig)
 
-func (sc *schemaCompiler) parseObjectsConfig() {
-	objectsConfig := make(objectConfigs)
+	for typeName, objectConfig := range engine.config.Objects {
+		var typ reflect.Type
+		retrievers := make(retrievers)
 
-	for _, typeDef := range sc.ast.Types {
-		if !isCustomType(typeDef) {
-			continue
+		// using reflect, loop over all methods on the retrievers object
+		retrieversValue := reflect.ValueOf(objectConfig.Retrievers)
+		retrieversTyp := retrieversValue.Type()
+		for i := 0; i < retrieversValue.NumMethod(); i++ {
+			method := retrieversTyp.Method(i)
+			methodVal := retrieversValue.Method(i)
+			methodTyp := methodVal.Type()
+
+			retrieverTyp, err := parseRetriever(methodTyp)
+			if err != nil {
+				return fmt.Errorf("%s: %s", typeName, err)
+			}
+
+			if typ == nil {
+				typ = retrieverTyp
+			} else if typ != retrieverTyp {
+				return fmt.Errorf("%s: all methods should return the same type, got %s and %s", typeName, typ.String(), retrieverTyp.String())
+			}
+
+			retrievers[method.Name] = methodVal
 		}
 
-		for _, fieldDef := range typeDef.Fields {
-			objectDir := parseObjectDir(fieldDef)
-			retreiveDir := parseRetrieveDir(fieldDef)
-
-			if objectDir == nil && retreiveDir == nil {
-				panic(fmt.Sprintf("directive not found for field %s", fieldDef.Name))
-			}
-
-			var typeName string
-			if objectDir != nil {
-				typeName = objectDir.key.typeName
-			} else {
-				typeName = retreiveDir.key.typeName
-			}
-
-			// initialize
-			if objectsConfig[typeName] == nil {
-				objectsConfig[typeName] = &objectConfig{}
-			}
-
-			// populate retriever
-			if retreiveDir != nil {
-
-			}
+		rc[typeName] = &retrieversObjectConfig{
+			primaryKey: objectConfig.PrimaryKey,
+			typ:        typ,
+			retreivers: retrievers,
 		}
 	}
 
-	sc.objectsConfig = objectsConfig
+	engine.retrieversConfig = rc
+
+	return nil
 }
 
-func parseObjectDir(fieldDef *ast.FieldDefinition) *objectDirective {
-	objDirective := fieldDef.Directives.ForName(directiveObjectKey)
-	if objDirective == nil {
-		return nil
+func (engine *engineCompiler) execRetriever(objectType string, funcName string, input RetrieverInput) (any, error) {
+	retriever := engine.retrieversConfig[objectType].retreivers[funcName]
+	args := []reflect.Value{reflect.ValueOf(input)}
+
+	resultValue := retriever.Call(args)
+
+	// check error
+	if len(resultValue) == 2 && !resultValue[1].IsNil() {
+		return nil, resultValue[1].Interface().(error)
 	}
 
-	fieldArg := objDirective.Arguments.ForName(directiveObjectFieldArgKey)
-	if fieldArg == nil {
-		return nil
-	}
-
-	keyNotation := parseObjectKey(fieldArg.Value.Raw)
-
-	return &objectDirective{
-		key: keyNotation,
-	}
-}
-
-type objectDirective struct {
-	key *objectKey
-}
-
-func parseRetrieveDir(fieldDef *ast.FieldDefinition) *retrieveDirective {
-	retrieveDir := fieldDef.Directives.ForName(directiveRetrieveKey)
-	if retrieveDir == nil {
-		return nil
-	}
-
-	retrieverKey := retrieveDir.Arguments.ForName(directiveRetrieveKeyArgKey)
-	if retrieverKey == nil {
-		return nil
-	}
-
-	key := parseObjectKey(retrieverKey.Value.Raw)
-
-	return &retrieveDirective{
-		key: key,
+	// check if the result is a slice
+	if resultValue[0].Kind() == reflect.Slice {
+		result := make([]map[string]any, resultValue[0].Len())
+		for i := 0; i < resultValue[0].Len(); i++ {
+			result[i] = structs.Map(resultValue[0].Index(i).Interface())
+		}
+		return result, nil
+	} else {
+		return structs.Map(resultValue[0].Interface()), nil
 	}
 }
 
-type retrieveDirective struct {
-	key *objectKey
+func resolveForType(typeName string, value map[string]any) map[string]map[string]any {
+	m := make(map[string]map[string]any)
+	m[typeName] = value
+	return m
 }
 
-func (sc *schemaCompiler) createObjectKeyMaps() {
-	objectKeyMaps := make(objectKeyMaps)
+func objectField(source any, typeName string, field string) (any, error) {
+	objects, ok := source.(map[string]map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("%s/%s: source is not a map[string]map[string]any", typeName, field)
+	}
 
-	for _, typeDef := range sc.ast.Types {
-		if !isCustomType(typeDef) {
-			continue
+	// get the object from the source
+	object, ok := objects[typeName]
+	if !ok {
+		return nil, fmt.Errorf("%s/%s: source does not contain %s", typeName, field, typeName)
+	}
+
+	// get the field from the object
+	value, ok := object[field]
+	if !ok {
+		return nil, fmt.Errorf("%s/%s: object does not contain %s", typeName, field, field)
+	}
+
+	return value, nil
+}
+
+// parseRetriever checks if the method has the correct signature and returns the corresponding reflect.Type
+// it should take 0 or 1 arguments
+// if it has a single argument it should be of type RetrieverInput
+// it should return 1 or 2 values
+// the first value should be a pointer to the object or a slice of pointers to the object
+// the second value should be an error
+func parseRetriever(methodTyp reflect.Type) (reflect.Type, error) {
+	var typ reflect.Type
+
+	if methodTyp.NumIn() > 1 {
+		return typ, fmt.Errorf("method should take 0 or 1 arguments, got %d", methodTyp.NumIn())
+	}
+
+	if methodTyp.NumIn() == 1 && methodTyp.In(0) != reflect.TypeOf(RetrieverInput{}) {
+		return typ, fmt.Errorf("method should take a single argument of type RetrieverInput, got %s", methodTyp.In(0).String())
+	}
+
+	if methodTyp.NumOut() < 1 || methodTyp.NumOut() > 2 {
+		return typ, fmt.Errorf("method should return 1 or 2 values, got %d", methodTyp.NumOut())
+	}
+
+	firstOut := methodTyp.Out(0)
+	if firstOut.Kind() == reflect.Slice {
+		if firstOut.Elem().Kind() != reflect.Ptr {
+			return typ, fmt.Errorf("first return value should be a slice of pointers, got %s", firstOut.Elem().Kind().String())
 		}
 
-		structMap := make(map[string]string)
-		for _, fieldDef := range typeDef.Fields {
-			objDirective := fieldDef.Directives.ForName(directiveObjectKey)
-			if objDirective == nil {
-				continue
-			}
-
-			fieldArg := objDirective.Arguments.ForName(directiveObjectFieldArgKey)
-			if fieldArg == nil {
-				continue
-			}
-
-			keyNotation := parseObjectKey(fieldArg.Value.Raw)
-
-			structMap[fieldDef.Name] = keyNotation.Value
+		typ = firstOut.Elem().Elem()
+	} else if firstOut.Kind() == reflect.Ptr {
+		if firstOut.Elem().Kind() == reflect.Slice {
+			return typ, fmt.Errorf("first return value should be a pointer to an object, got a pointer to a slice")
 		}
 
-		objectKeyMaps[typeDef.Name] = structMap
+		typ = firstOut.Elem()
+	} else {
+		return typ, fmt.Errorf("first return value should be a pointer or a slice, got %s", firstOut.Kind().String())
 	}
 
-	sc.objectKeyMaps = objectKeyMaps
+	if methodTyp.NumOut() == 2 && methodTyp.Out(1) != reflect.TypeOf((*error)(nil)).Elem() {
+		return typ, fmt.Errorf("second return value should be an error, got %s", methodTyp.Out(1).String())
+	}
+
+	return typ, nil
 }
+
+type retreiversConfig map[string]*retrieversObjectConfig
+type retrieversObjectConfig struct {
+	primaryKey string
+	typ        reflect.Type
+	retreivers retrievers
+}
+type retrievers map[string]reflect.Value
 
 var builtInScalars = map[string]*graphql.Scalar{
 	"String":  graphql.String,
@@ -277,283 +416,4 @@ var builtInScalars = map[string]*graphql.Scalar{
 	"Float":   graphql.Float,
 	"Boolean": graphql.Boolean,
 	"ID":      graphql.ID,
-}
-
-func (sc *schemaCompiler) createTypes() {
-	// initialize custom types fields
-	for _, typeDef := range sc.ast.Types {
-		if !isCustomType(typeDef) {
-			continue
-		}
-
-		fields := make(graphql.Fields)
-
-		for _, fieldDef := range typeDef.Fields {
-			scalar, isBuiltIn := builtInScalars[fieldDef.Type.NamedType]
-			if !isBuiltIn {
-				scalar = sc.config.Scalars[fieldDef.Type.NamedType]
-			}
-
-			if scalar == nil {
-				panic(fmt.Sprintf("scalar %s not found", fieldDef.Type.NamedType))
-			}
-
-			fields[fieldDef.Name] = &graphql.Field{
-				Type: scalar,
-			}
-		}
-
-		sc.objectsConfig[typeDef.Name].graphqlType = graphql.NewObject(graphql.ObjectConfig{
-			Name:   typeDef.Name,
-			Fields: fields,
-		})
-	}
-
-	// initialize custom types relations
-	for _, typeDef := range sc.ast.Types {
-		if !isCustomType(typeDef) {
-			continue
-		}
-
-		for _, fieldDef := range typeDef.Fields {
-			if sc.objectsConfig[typeDef.Name].graphqlType[fieldDef.Type.NamedType] == nil {
-				continue
-			}
-
-			// do something with the field
-			if fieldDef.Name != "brand" {
-				continue
-			}
-
-			// graphqlTypes[fieldDef.Name]
-		}
-
-		graphqlTypes[typeDef.Name] = graphType
-	}
-
-	sc.types = graphqlTypes
-}
-
-func (sc *schemaCompiler) createRetrievers() {
-	r := make(objectConfigs)
-
-	for _, typeDef := range sc.ast.Types {
-		if !isCustomObject(typeDef) {
-			continue
-		}
-
-		for _, fieldDef := range typeDef.Fields {
-			retrieveDir := fieldDef.Directives.ForName(directiveRetrieveKey)
-			if retrieveDir == nil {
-				continue
-			}
-
-			retrieverKey := retrieveDir.Arguments.ForName(directiveRetrieveKeyArgKey)
-			if retrieverKey == nil {
-				continue
-			}
-
-			key := parseObjectKey(retrieverKey.Value.Raw)
-
-			objConfig := sc.config.Objects[key.TypeName]
-			if objConfig == nil {
-				panic(fmt.Sprintf("Object %s not found", key.TypeName))
-			}
-
-			// use reflect to get the method by name
-			retrieverReflect := reflect.ValueOf(objConfig.Retrievers)
-			retriever := retrieverReflect.MethodByName(key.Value)
-			if !retriever.IsValid() {
-				panic(fmt.Sprintf("Retriever %s not found", key.Value))
-			}
-
-			returnType := retriever.Type().Out(0)
-			if returnType.Kind() == reflect.Ptr {
-				returnType = returnType.Elem()
-			}
-
-			if r[key.TypeName] == nil {
-				r[key.TypeName] = make(objectConfig)
-			}
-
-			r[key.TypeName][key.Value] = &retrieverConfig{
-				function:   retriever,
-				returnType: returnType,
-			}
-		}
-	}
-
-	sc.objectsConfig = r
-}
-
-func (sc *schemaCompiler) execRetriever(objectType string, funcName string, input RetrieverInput) (any, error) {
-	retriever := sc.objectsConfig[objectType][funcName]
-	args := []reflect.Value{reflect.ValueOf(input)}
-
-	resultRef := retriever.function.Call(args)
-	if len(resultRef) != 2 {
-		return nil, fmt.Errorf("retriever %s must return 2 values", funcName)
-	}
-
-	println(retriever.returnType.String())
-
-	valueReflect := resultRef[0]
-	errReflect := resultRef[1]
-
-	if !errReflect.IsNil() {
-		return nil, errReflect.Interface().(error)
-	}
-
-	if dataIsStruct(valueReflect) {
-		value := structToMap(dataGetValue(valueReflect))
-
-		return value, nil
-	}
-
-	if dataIsSlice(valueReflect) {
-		valueReflect = dataGetSlice(valueReflect)
-
-		value := make([]map[string]any, valueReflect.Len())
-		for i := 0; i < valueReflect.Len(); i++ {
-			valueReflect = valueReflect.Index(i)
-
-			if !dataIsStruct(valueReflect) {
-				return nil, fmt.Errorf("retriever %s must return a struct or a pointer to a struct", funcName)
-			}
-
-			valueElem := structToMap(dataGetValue(valueReflect))
-
-			value[i] = valueElem
-		}
-
-		return value, nil
-	}
-
-	return nil, fmt.Errorf("retriever %s must return a struct or a slice", funcName)
-}
-
-func (sc *schemaCompiler) mapData(objectType string, value any) (map[string]any, error) {
-	m := make(map[string]any)
-
-	valueReflect := reflect.ValueOf(value)
-	isMap := valueReflect.Kind() == reflect.Map
-
-	for fieldName, keyNotation := range sc.objectKeyMaps[objectType] {
-		var fieldValue reflect.Value
-		if isMap {
-			// using reflect get the key value
-			fieldValue = valueReflect.MapIndex(reflect.ValueOf(keyNotation))
-		} else {
-			fieldValue = valueReflect.FieldByName(fieldName)
-		}
-
-		if !fieldValue.IsValid() {
-			return nil, fmt.Errorf("field %s not found", fieldName)
-		}
-
-		if fieldValue.Kind() == reflect.Ptr {
-			fieldValue = fieldValue.Elem()
-		}
-
-		if fieldValue.Kind() == reflect.Invalid {
-			m[fieldName] = nil
-		} else {
-			m[fieldName] = fieldValue.Interface()
-		}
-	}
-
-	return m, nil
-}
-
-func isCustomType(def *ast.Definition) bool {
-	if !isCustomObject(def) {
-		return false
-	}
-
-	if def.Name == "Query" || def.Name == "Mutation" {
-		return false
-	}
-
-	return true
-}
-
-func isCustomObject(def *ast.Definition) bool {
-	if def.Kind != ast.Object {
-		return false
-	}
-
-	if def.BuiltIn {
-		return false
-	}
-
-	return true
-}
-
-func parseObjectKey(value string) *objectKey {
-	parts := strings.Split(value, "/")
-
-	if len(parts) != 2 {
-		panic(fmt.Sprintf("Invalid key notation: %s", value))
-	}
-
-	return &objectKey{
-		typeName: parts[0],
-		value:    parts[1],
-	}
-}
-
-// check if is a struct or a pointer to a struct
-func dataIsStruct(value reflect.Value) bool {
-	if value.Kind() == reflect.Struct {
-		return true
-	}
-
-	if value.Kind() == reflect.Pointer && value.Elem().Kind() == reflect.Struct {
-		return true
-	}
-
-	return false
-}
-
-// check if is a slice or a pointer to a slice
-func dataIsSlice(value reflect.Value) bool {
-	if value.Kind() == reflect.Slice {
-		return true
-	}
-
-	if value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Slice {
-		return true
-	}
-
-	return false
-}
-
-func dataGetValue(value reflect.Value) any {
-	if value.Kind() == reflect.Ptr {
-		return value.Elem().Interface()
-	}
-
-	return value.Interface()
-}
-
-func dataGetSlice(value reflect.Value) reflect.Value {
-	if value.Kind() == reflect.Ptr {
-		return value.Elem()
-	}
-
-	return value
-}
-
-func structToMap(s any) map[string]any {
-	m := make(map[string]any)
-
-	sType := reflect.TypeOf(s)
-	for i := 0; i < sType.NumField(); i++ {
-		field := sType.Field(i)
-		fieldValue := reflect.ValueOf(s).Field(i)
-
-		m[field.Name] = fieldValue.Interface()
-	}
-
-	return m
 }
