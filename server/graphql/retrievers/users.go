@@ -9,7 +9,7 @@ import (
 type RetrieveUser struct{}
 
 func (*RetrieveUser) ByID(args objectgraph.RetrieverInput) (*database.User, error) {
-	userID := args.PrimaryID.(uuid.UUID)
+	userID := args["primaryID"].(uuid.UUID)
 
 	user, err := database.SelectUserByID(userID)
 	if err != nil {
@@ -20,7 +20,7 @@ func (*RetrieveUser) ByID(args objectgraph.RetrieverInput) (*database.User, erro
 }
 
 func (*RetrieveUser) ByIDs(args objectgraph.RetrieverInput) ([]*database.User, error) {
-	userIDs := args.PrimaryID.([]uuid.UUID)
+	userIDs := args["primaryID"].([]uuid.UUID)
 
 	users, err := database.SelectUsersByIDs(userIDs)
 	if err != nil {

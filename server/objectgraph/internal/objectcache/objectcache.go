@@ -2,48 +2,42 @@ package objectcache
 
 import (
 	"context"
-	"reflect"
 	"sync"
 
-	"github.com/patrickmn/go-cache"
 	"github.com/redis/go-redis/v9"
 )
 
 type ObjectCache struct {
-	redis               *redis.Client
-	prefix              string
-	objectCache         objectCache
-	objectLockers       objectLockers
-	objectLockersLocker objectLockersLocker
-	objectTypesReflect  objectTypesReflect
+	redis  *redis.Client
+	prefix string
+
+	cacheGroups *cacheGroups
 }
 
-type objectCache map[string]*cache.Cache
-type objectLockers map[string]map[string]*sync.Mutex
-type objectLockersLocker map[string]*sync.Mutex
-type objectTypesReflect map[string]reflect.Type
-
-func New(prefix string, r *redis.Options, typeNames []string) (*ObjectCache, error) {
-	client := redis.NewClient(r)
+func New(prefix string, redisOpt *redis.Options) (*ObjectCache, error) {
+	client := redis.NewClient(redisOpt)
 
 	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err
 	}
 
+	if prefix == "" {
+		prefix = "objectcache"
+	} else {
+		prefix = prefix + ":objectcache"
+	}
+
 	oc := &ObjectCache{
-		redis:               client,
-		prefix:              initPrefix(prefix),
-		objectCache:         initObjectCache(typeNames),
-		objectLockers:       initObjectLockers(typeNames),
-		objectLockersLocker: initObjectLockersLocker(typeNames),
+		redis:  client,
+		prefix: prefix,
+		cacheGroups: &cacheGroups{
+			lock:   &sync.RWMutex{},
+			groups: make(map[string]*cacheGroup),
+		},
 	}
 
 	return oc, nil
-}
-
-func (oc *ObjectCache) InitObjectTypesReflect(objectTypesReflect objectTypesReflect) {
-	oc.objectTypesReflect = objectTypesReflect
 }
 
 func (oc *ObjectCache) Close() {

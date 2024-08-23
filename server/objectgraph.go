@@ -4,9 +4,9 @@ import (
 	"embed"
 	"os"
 
-	"github.com/graphql-go/graphql"
 	"github.com/olyop/objectgraph/graphql/retrievers"
 	"github.com/olyop/objectgraph/objectgraph"
+	"github.com/olyop/objectgraph/utils"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -15,12 +15,14 @@ var schemaFs embed.FS
 
 func engineConfiguration() *objectgraph.Configuration {
 	return &objectgraph.Configuration{
-		SourceFiles: schemaFs,
-		CachePrefix: os.Getenv("REDIS_PREFIX"),
-		CacheRedis: &redis.Options{
-			Addr:     os.Getenv("REDIS_URL"),
-			Username: os.Getenv("REDIS_USERNAME"),
-			Password: os.Getenv("REDIS_PASSWORD"),
+		Schema: utils.CompileSchemaFS(schemaFs),
+		Cache: &objectgraph.ConfigurationCache{
+			Prefix: os.Getenv("REDIS_PREFIX"),
+			Redis: &redis.Options{
+				Addr:     os.Getenv("REDIS_URL"),
+				Username: os.Getenv("REDIS_USERNAME"),
+				Password: os.Getenv("REDIS_PASSWORD"),
+			},
 		},
 		Objects: objectgraph.ConfigurationObjects{
 			"Brand": &objectgraph.ConfigurationObject{
@@ -47,10 +49,6 @@ func engineConfiguration() *objectgraph.Configuration {
 				PrimaryKey: "UserID",
 				Retrievers: &retrievers.RetrieveUser{},
 			},
-		},
-		Scalars: map[string]*graphql.Scalar{
-			"UUID":      uuidScalar,
-			"Timestamp": timestampScalar,
 		},
 	}
 }

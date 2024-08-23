@@ -7,6 +7,7 @@ client/.env.development.local
 database/data/tmp
 database/schema/tmp
 
+tmp
 server/tmp
 
 .env

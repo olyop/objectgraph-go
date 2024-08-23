@@ -11,7 +11,7 @@ import (
 type RetrieveBrand struct{}
 
 func (*RetrieveBrand) ByID(args objectgraph.RetrieverInput) (*database.Brand, error) {
-	brandID := args.PrimaryID.(uuid.UUID)
+	brandID := args["primaryID"].(uuid.UUID)
 
 	brand, err := database.SelectBrandByID(brandID)
 	if err != nil {
@@ -22,7 +22,7 @@ func (*RetrieveBrand) ByID(args objectgraph.RetrieverInput) (*database.Brand, er
 }
 
 func (*RetrieveBrand) ByIDs(args objectgraph.RetrieverInput) ([]*database.Brand, error) {
-	brandIDs := args.PrimaryID.([]uuid.UUID)
+	brandIDs := args["primaryID"].([]uuid.UUID)
 
 	brands, err := database.SelectBrandsByIDs(brandIDs)
 	if err != nil {

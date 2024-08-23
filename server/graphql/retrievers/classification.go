@@ -9,7 +9,7 @@ import (
 type RetrieveClassification struct{}
 
 func (*RetrieveClassification) ByID(args objectgraph.RetrieverInput) (*database.Classification, error) {
-	classificationID := args.PrimaryID.(uuid.UUID)
+	classificationID := args["primaryID"].(uuid.UUID)
 
 	classification, err := database.SelectClassificationByID(classificationID)
 	if err != nil {
@@ -20,7 +20,7 @@ func (*RetrieveClassification) ByID(args objectgraph.RetrieverInput) (*database.
 }
 
 func (*RetrieveClassification) ByIDs(args objectgraph.RetrieverInput) ([]*database.Classification, error) {
-	classificationIDs := args.PrimaryID.([]uuid.UUID)
+	classificationIDs := args["primaryID"].([]uuid.UUID)
 
 	classifications, err := database.SelectClassificationsByIDs(classificationIDs)
 	if err != nil {

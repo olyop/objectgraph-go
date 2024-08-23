@@ -12,54 +12,52 @@ import (
 
 func (oc *ObjectCache) Get(
 	groupKey string,
-	reflectType reflect.Type,
-	cacheKey string,
+	objectKey string,
+	valueKey string,
 	ttl time.Duration,
+	reflectType reflect.Type,
 ) (map[string]any, bool, error) {
-	object, exists := oc.inmemoryGet(groupKey, cacheKey)
-	if exists {
-		return object, true, nil
+	// check the cache first
+	valueCache := oc.getValue(groupKey, objectKey, valueKey)
+	if valueCache.value != nil {
+		return valueCache.value, true, nil
 	}
 
-	// not in the cache, lock the object as only one goroutine should be fetching it
-	objectLocker := oc.objectLocker(groupKey, cacheKey)
-	objectLocker.Lock()
-	defer objectLocker.Unlock()
+	// not in the cache, lock the object value as only one goroutine should be fetching it
+	valueCache.lock.Lock()
+	defer valueCache.lock.Unlock()
 
 	// check again for where another goroutine has already fetched the object
-	object, exists = oc.inmemoryGet(groupKey, cacheKey)
-	if exists {
-		return object, true, nil
+	valueCache = oc.getValue(groupKey, objectKey, valueKey)
+	if valueCache.value != nil {
+		return valueCache.value, true, nil
 	}
 
 	// fetch the object from redis
-	object, exists, err := oc.redisGet(groupKey, reflectType, cacheKey)
+	value, exists, err := oc.redisGet(groupKey, objectKey, valueKey, reflectType)
 	if err != nil {
+		// error fetching from redis so delete the value from the cache
+		oc.deleteValue(groupKey, objectKey, valueKey)
 		return nil, false, err
 	}
-
 	if exists {
-		oc.inmemorySet(groupKey, cacheKey, object, ttl)
-
-		return object, true, nil
+		// set the value in the inmemory cache
+		oc.setValue(groupKey, objectKey, valueKey, ttl, value)
+		return value, true, nil
 	}
 
+	// object not found
 	return nil, false, nil
 }
 
-func (oc *ObjectCache) inmemoryGet(groupKey string, cacheKey string) (map[string]any, bool) {
-	objectCache := oc.objectCache[groupKey]
+func (oc *ObjectCache) redisGet(
+	groupKey string,
+	objectKey string,
+	valueKey string,
+	reflectType reflect.Type,
+) (map[string]any, bool, error) {
+	redisKey := oc.redisKey(groupKey, objectKey, valueKey)
 
-	object, exists := objectCache.Get(cacheKey)
-	if exists {
-		return object.(map[string]any), true
-	}
-
-	return nil, false
-}
-
-func (oc *ObjectCache) redisGet(groupKey string, reflectType reflect.Type, cacheKey string) (map[string]any, bool, error) {
-	redisKey := oc.redisKey(groupKey, cacheKey)
 	data, err := oc.redis.Get(context.Background(), redisKey).Bytes()
 	if err == redis.Nil {
 		return nil, false, nil
@@ -67,13 +65,12 @@ func (oc *ObjectCache) redisGet(groupKey string, reflectType reflect.Type, cache
 		return nil, false, err
 	}
 
+	// cast the object to the correct type
 	result := reflect.New(reflectType).Interface()
 	err = json.Unmarshal(data, result)
 	if err != nil {
 		return nil, false, err
 	}
 
-	object := structs.Map(result)
-
-	return object, true, nil
+	return structs.Map(result), true, nil
 }

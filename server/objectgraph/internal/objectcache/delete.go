@@ -6,20 +6,18 @@ import (
 
 func (oc *ObjectCache) Delete(
 	groupKey string,
-	cacheKey string,
+	objectKey string,
+	valueKey string,
 ) error {
-	inmemoryCache := oc.objectCache[groupKey]
-
-	objectlocker := oc.objectLocker(groupKey, cacheKey)
-	objectlocker.Lock()
-	defer objectlocker.Unlock()
-
-	err := oc.redis.Del(context.Background(), oc.redisKey(groupKey, cacheKey)).Err()
+	// delete the object from redis
+	redisKey := oc.redisKey(groupKey, objectKey, valueKey)
+	err := oc.redis.Del(context.Background(), redisKey).Err()
 	if err != nil {
 		return err
 	}
 
-	inmemoryCache.Delete(cacheKey)
+	// delete the object value in the inmemory cache
+	oc.deleteValue(groupKey, objectKey, valueKey)
 
 	return nil
 }

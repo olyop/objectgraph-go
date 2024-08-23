@@ -9,7 +9,7 @@ import (
 type RetrieveCategory struct{}
 
 func (*RetrieveCategory) ByID(input objectgraph.RetrieverInput) (*database.Category, error) {
-	categoryID := input.PrimaryID.(uuid.UUID)
+	categoryID := input["primaryID"].(uuid.UUID)
 
 	category, err := database.SelectCategoryByID(categoryID)
 	if err != nil {
@@ -20,7 +20,7 @@ func (*RetrieveCategory) ByID(input objectgraph.RetrieverInput) (*database.Categ
 }
 
 func (*RetrieveCategory) ByIDs(input objectgraph.RetrieverInput) ([]*database.Category, error) {
-	categoryIDs := input.PrimaryID.([]uuid.UUID)
+	categoryIDs := input["primaryID"].([]uuid.UUID)
 
 	categories, err := database.SelectCategoriesByIDs(categoryIDs)
 	if err != nil {
@@ -31,7 +31,7 @@ func (*RetrieveCategory) ByIDs(input objectgraph.RetrieverInput) ([]*database.Ca
 }
 
 func (*RetrieveCategory) AllByProductID(input objectgraph.RetrieverInput) ([]*database.Category, error) {
-	productID := input.Args["productID"].(uuid.UUID)
+	productID := input["productID"].(uuid.UUID)
 
 	categories, err := database.SelectCategoriesByProductID(productID)
 	if err != nil {

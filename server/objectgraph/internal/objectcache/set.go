@@ -8,49 +8,32 @@ import (
 
 func (oc *ObjectCache) Set(
 	groupKey string,
-	cacheKey string,
-	object map[string]any,
+	objectKey string,
+	valueKey string,
+	value map[string]any,
 	ttl time.Duration,
 ) error {
-	objectCache := oc.objectCache[groupKey]
-
-	// lock the object so only one goroutine can set it at a time
-	objectLocker := oc.objectLocker(groupKey, cacheKey)
-	objectLocker.Lock()
-	defer objectLocker.Unlock()
-
 	// set the object in redis
-	err := oc.redisSet(groupKey, cacheKey, object, ttl)
+	err := oc.redisSet(groupKey, objectKey, valueKey, ttl, value)
 	if err != nil {
-		objectCache.Delete(cacheKey)
-
+		oc.deleteValue(groupKey, objectKey, valueKey)
 		return err
 	}
 
-	// set the object in the cache
-	oc.inmemorySet(groupKey, cacheKey, object, ttl)
+	// set the object value in the inmemory cache
+	oc.setValue(groupKey, objectKey, valueKey, ttl, value)
 
 	return nil
 }
 
-func (oc *ObjectCache) inmemorySet(
-	groupKey string,
-	cacheKey string,
-	object any,
-	ttl time.Duration,
-) {
-	objectCache := oc.objectCache[groupKey]
-
-	objectCache.Set(cacheKey, object, ttl)
-}
-
 func (oc *ObjectCache) redisSet(
 	groupKey string,
-	cacheKey string,
-	object any,
+	objectKey string,
+	valueKey string,
 	ttl time.Duration,
+	object map[string]any,
 ) error {
-	redisKey := oc.redisKey(groupKey, cacheKey)
+	redisKey := oc.redisKey(groupKey, objectKey, valueKey)
 
 	json, err := json.Marshal(object)
 	if err != nil {

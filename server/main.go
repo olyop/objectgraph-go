@@ -24,7 +24,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer engine.Close()
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

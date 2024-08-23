@@ -2,29 +2,29 @@ package objectgraph
 
 import (
 	"errors"
-	"io/fs"
 
-	"github.com/graphql-go/graphql"
 	"github.com/redis/go-redis/v9"
 )
 
 type Configuration struct {
-	SourceFiles fs.FS
-	CachePrefix string
-	CacheRedis  *redis.Options
-	Objects     ConfigurationObjects
-	Scalars     map[string]*graphql.Scalar
+	Schema  string
+	Cache   *ConfigurationCache
+	Objects ConfigurationObjects
+}
+
+type ConfigurationCache struct {
+	Prefix string
+	Redis  *redis.Options
 }
 
 type ConfigurationObjects map[string]*ConfigurationObject
-
 type ConfigurationObject struct {
 	PrimaryKey string
 	Retrievers any
 }
 
 func (c *Configuration) validate() error {
-	if c.CacheRedis == nil {
+	if c.Cache.Redis == nil {
 		return errors.New("cacheRedis is required")
 	}
 
@@ -55,16 +55,4 @@ func (c *Configuration) validate() error {
 	}
 
 	return nil
-}
-
-func (c *Configuration) getTypeNames() []string {
-	types := make([]string, 0, len(c.Objects)+1)
-
-	for key := range c.Objects {
-		types = append(types, key)
-	}
-
-	types = append(types, "Query")
-
-	return types
 }

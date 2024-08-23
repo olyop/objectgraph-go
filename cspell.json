@@ -1,10 +1,10 @@
 {
 	"import": ["@oly_op/cspell-dict/cspell-ext.json"],
 	"ignorePaths": ["cspell-dictionary.txt", "database/data/files/**/*.txt", "schema.json"],
-	"dictionaries": ["graphql-go"],
+	"dictionaries": ["objectgraph-go"],
 	"dictionaryDefinitions": [
 		{
-			"name": "graphql-go",
+			"name": "objectgraph-go",
 			"path": "./cspell-dictionary.txt"
 		}
 	]

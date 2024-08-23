@@ -1,4 +1,4 @@
-package parser
+package utils
 
 import (
 	"fmt"
@@ -10,15 +10,30 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func readSchema(schemaFs fs.FS) ([]*ast.Source, error) {
+func CompileSchemaFS(schemaFs fs.FS) string {
+	return compileSchemaFiles(readSchema(schemaFs))
+}
+
+func compileSchemaFiles(schemaFiles []*ast.Source) string {
+	schema := ""
+
+	for _, source := range schemaFiles {
+		schema += source.Input
+	}
+
+	return schema
+
+}
+
+func readSchema(schemaFs fs.FS) []*ast.Source {
 	sourceFiles := make([]*ast.Source, 0)
 
 	err := fs.WalkDir(schemaFs, ".", walkSourceFile(schemaFs, &sourceFiles))
 	if err != nil {
-		return nil, fmt.Errorf("failed to walk directory %s: %w", "graphql/schema", err)
+		panic(fmt.Errorf("failed to walk directory %s: %w", "graphql/schema", err))
 	}
 
-	return sourceFiles, err
+	return sourceFiles
 }
 
 var validExtensions = map[string]struct{}{

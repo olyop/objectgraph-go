@@ -9,7 +9,7 @@ import (
 type RetrieveProduct struct{}
 
 func (*RetrieveProduct) ByID(args objectgraph.RetrieverInput) (*database.Product, error) {
-	productID := args.PrimaryID.(uuid.UUID)
+	productID := args["primaryID"].(uuid.UUID)
 
 	product, err := database.SelectProductByID(productID)
 	if err != nil {

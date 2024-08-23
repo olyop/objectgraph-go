@@ -1,31 +1,7 @@
 package objectcache
 
-import (
-	"sync"
-)
+import "fmt"
 
-func (oc *ObjectCache) objectLocker(groupKey string, cacheKey string) *sync.Mutex {
-	objectLockerGroup := oc.objectLockers[groupKey]
-
-	objectLocker, initialized := objectLockerGroup[cacheKey]
-
-	if !initialized {
-		objectlockerMu := oc.objectLockersLocker[groupKey]
-
-		objectlockerMu.Lock()
-		defer objectlockerMu.Unlock()
-
-		// check again if the objectlocker is initialized
-		objectLocker, initialized = objectLockerGroup[cacheKey]
-		if !initialized {
-			objectLocker = &sync.Mutex{}
-			objectLockerGroup[cacheKey] = objectLocker
-		}
-	}
-
-	return objectLocker
-}
-
-func (oc *ObjectCache) redisKey(groupKey string, cacheKey string) string {
-	return oc.prefix + ":" + groupKey + ":" + cacheKey
+func (oc *ObjectCache) redisKey(groupKey string, objectKey string, valueKey string) string {
+	return fmt.Sprintf("%s:%s:%s:%s", oc.prefix, groupKey, objectKey, valueKey)
 }
